@@ -2,11 +2,20 @@ import React, { useState } from 'react';
 import logo from '../../img/logo/logo2.png'; 
 import ilustracao from '../../img/IMG_LOGIN.png'; 
 import { Link } from "react-router-dom";
-
+import { FiEye, FiEyeOff } from 'react-icons/fi';
 
 export default function LoginProfessor() {
   const [login, setLogin] = useState('');
   const [senha, setSenha] = useState('');
+  const [mostrarSenha, setMostrarSenha] = useState(false);
+
+  function mascaraCPF(value) {
+    value = value.replace(/\D/g, '');
+    value = value.replace(/(\d{3})(\d)/, '$1.$2');
+    value = value.replace(/(\d{3})(\d)/, '$1.$2');
+    value = value.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+    return value;
+  }
 
   const handleLogin = (e) => {
     e.preventDefault();
@@ -27,21 +36,37 @@ export default function LoginProfessor() {
             <h2 style={styles.headingProf}>Login de Professores</h2>
             <h2 style={styles.heading}>Bem-vindo(a) ao ClassLine!</h2>
 
-            <form onSubmit={handleLogin} style={styles.form}>
-            <input
+             <form onSubmit={handleLogin} style={styles.form}>
+              <input
                 type="text"
-                placeholder="Login"
+                placeholder="CPF"
                 value={login}
-                onChange={(e) => setLogin(e.target.value)}
+                onChange={(e) => setLogin(mascaraCPF(e.target.value))}
                 style={styles.input}
-            />
-            <input
-                type="password"
+                maxLength={14}
+              />
+            <div style={styles.senhaContainer}>
+              <input
+                type={mostrarSenha ? "text" : "password"}
                 placeholder="Senha"
                 value={senha}
                 onChange={(e) => setSenha(e.target.value)}
-                style={styles.input}
-            />
+                style={styles.senhaInput}
+              />
+              <button
+                type="button"
+                onClick={() => setMostrarSenha(!mostrarSenha)}
+                style={styles.olhinhoButton}
+                tabIndex={-1}
+                aria-label={mostrarSenha ? "Ocultar senha" : "Mostrar senha"}
+              >
+                {mostrarSenha ? (
+                  <FiEyeOff size={22} color="#787878" />
+                ) : (
+                  <FiEye size={22} color="#787878" />
+                )}
+              </button>
+            </div>
             <button type="submit" style={styles.button}>Acessar</button>
             </form>
         </div>
@@ -162,6 +187,33 @@ const styles = {
         alignItems: 'flex-start', 
         gap: '10px',
     },
+    senhaContainer: {
+      position: 'relative',
+      width: '100%',
+      maxWidth: '300px', 
+    },
+    senhaInput: {
+      padding: '10px 44px 10px 15px', 
+      borderRadius: '5px',
+      border: '1px solid #ccc',
+      fontSize: '16px',
+      width: '100%',
+      boxSizing: 'border-box',
+    },
+    olhinhoButton: {
+      position: "absolute",
+      right: "12px",
+      top: "50%",
+      transform: "translateY(-50%)",
+      background: "none",
+      border: "none",
+      cursor: "pointer",
+      padding: 0,
+      display: "flex",
+      alignItems: "center",
+      zIndex: 2
+    },
+
 
   };
 

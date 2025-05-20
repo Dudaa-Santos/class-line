@@ -4,6 +4,7 @@ import LoginProfessor from "./pages/professor/loginProfessor";
 import LoginInstituicao from "./pages/instituicao/loginInstituicao";
 import HomeInstituicao from "./pages/instituicao/homeInstituicao";
 import HomeProfessor from "./pages/professor/homeProfessor";
+import CadastroUsuario from "./pages/instituicao/cadastrarUsuario";
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
         <Route path="/login-instituicao" element={<LoginInstituicao />} />
         <Route path="/home-instituicao" element={<HomeInstituicao />} />
         <Route path="/home-professor" element={<HomeProfessor />} />
+        <Route path="/cadastro-usuario" element={<CadastroUsuario/>} />
       </Routes>
     </BrowserRouter>
   );
