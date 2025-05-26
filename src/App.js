@@ -1,24 +1,15 @@
 import React from "react";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import LoginProfessor from "./pages/professor/loginProfessor";
-import LoginInstituicao from "./pages/instituicao/loginInstituicao";
-import HomeInstituicao from "./pages/instituicao/homeInstituicao";
-import HomeProfessor from "./pages/professor/homeProfessor";
-import CadastroUsuario from "./pages/instituicao/cadastrarUsuario";
+import Routes from "../src/routes/routes";
+import { AuthProvider } from "./context/authContext";
 
-function App() {
-  return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Navigate to="/login-professor" />} />
-        <Route path="/login-professor" element={<LoginProfessor />} />
-        <Route path="/login-instituicao" element={<LoginInstituicao />} />
-        <Route path="/home-instituicao" element={<HomeInstituicao />} />
-        <Route path="/home-professor" element={<HomeProfessor />} />
-        <Route path="/cadastro-usuario" element={<CadastroUsuario/>} />
-      </Routes>
-    </BrowserRouter>
-  );
+class App extends React.Component {
+  render() {
+    return (
+      <AuthProvider>
+        <Routes />
+      </AuthProvider>
+    );
+  }
 }
 
 export default App;
