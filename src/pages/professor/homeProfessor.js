@@ -1,31 +1,37 @@
 import React from "react";
-import Logo from "../../img/logo/logo-branca-sFundo.png";
-import UserIcon from "../../img/sem-preenchimento/userIcon.png";
+import Fundo from "../../components/fundo";
 
 function Home() {
   const turmas = [
-    { nome: "ADS-2025-1", cor: "#4B9EFF" },     
-    { nome: "ADS-2025-2", cor: "#36B76C" },      
-    { nome: "SI - 2025", cor: "#F4B43E" },       
-    { nome: "ENG - SOFT 2025", cor: "#A186E8" }, 
-    { nome: "CT-DS - 2025", cor: "#28C3B4" },   
+    { nome: "ADS-2025-1", cor: "#4B9EFF" },
+    { nome: "ADS-2025-2", cor: "#36B76C" },
+    { nome: "SI - 2025", cor: "#F4B43E" },
+    { nome: "ENG - SOFT 2025", cor: "#A186E8" },
+    { nome: "CT-DS - 2025", cor: "#28C3B4" },
   ];
 
   return (
-    <div style={styles.homeContainer}>
-      <nav style={styles.navbar}>
-        <img src={Logo} alt="Logo" style={styles.logo} />
-        <img src={UserIcon} alt="UserIcon" style={styles.userIcon} />
-      </nav>
-
+    <Fundo>
       <div style={styles.content}>
         <h2 style={styles.saudacao}>Olá, Professor Usuário!</h2>
         <span style={styles.programacao}>Programação</span>
         <h2 style={styles.tituloTurmas}>Minhas Turmas</h2>
         <div style={styles.turmasContainer}>
           {turmas.map((turma, idx) => (
-            <div key={idx} style={{ ...styles.turmaCard, background: `linear-gradient(0deg, #fff 65%, ${turma.cor} 35%)` }}>
-              <div style={{ ...styles.turmaNome, color: "#fff", background: turma.cor }}>
+            <div
+              key={idx}
+              style={{
+                ...styles.turmaCard,
+                background: `linear-gradient(0deg, #fff 65%, ${turma.cor} 35%)`,
+              }}
+            >
+              <div
+                style={{
+                  ...styles.turmaNome,
+                  background: turma.cor,
+                  color: "#fff",
+                }}
+              >
                 {turma.nome}
               </div>
               <button style={styles.botaoVerMais}>Ver Mais</button>
@@ -33,37 +39,14 @@ function Home() {
           ))}
         </div>
       </div>
-    </div>
+    </Fundo>
   );
 }
 
 export default Home;
 
+
 const styles = {
-  navbar: {
-    width: '100vw',
-    height: '80px',
-    background: '#092851',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: '0 30px',
-    boxSizing: 'border-box',
-  },
-  logo: {
-    height: '70px',
-    width: 'auto',
-    marginLeft: '30px',
-  },
-  userIcon: {
-    width: '36px',
-    height: '36px',
-    cursor: 'pointer',
-  },
-  homeContainer: {
-    minHeight: '100vh',
-    background: '#f5f5f7',
-  },
   content: {
     maxWidth: '1200px',
     margin: '0 auto',

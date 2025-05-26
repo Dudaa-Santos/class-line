@@ -1,47 +1,44 @@
 import React from "react";
 import Logo from "../img/logo/logo-branca-sFundo.png";
+import UserIcon from "../img/sem-preenchimento/userIcon.png"
 
-function Home() {
+function Fundo({ children }) {
   return (
-    <div style={styles.homeContainer}>
+    <div style={styles.Container}>
       <nav style={styles.navbar}>
         <img src={Logo} alt="Logo" style={styles.logo} />
-        <svg style={styles.userIcon} viewBox="0 0 24 24">
-          <circle cx="12" cy="8" r="4" />
-          <path d="M4 20c0-4 8-4 8-4s8 0 8 4v1H4v-1z" />
-        </svg>
+        <img src={UserIcon} alt="UserIcon" style={styles.UserIcon} />
       </nav>
-      {/* Conteúdo da Home pode ir aqui */}
+      {children}
     </div>
   );
 }
 
-export default Home;
+export default Fundo;
 
 const styles = {
-  navbar: {
+navbar: {
     width: '100vw',
-    height: '100px',
+    height: '80px',
     background: '#092851',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
-    padding: '0 32px',
+    padding: '0 30px',
     boxSizing: 'border-box',
   },
   logo: {
-    height: '80px',
+    height: '70px',
     width: 'auto',
     marginLeft: '30px',
   },
-  userIcon: {
-    width: '45px',
-    height: '45px',
-    fill: '#fff',
+  UserIcon: {
+    width: '36px',
+    height: '36px',
     cursor: 'pointer',
   },
-  homeContainer: {
+  Container: {
     minHeight: '100vh',
     background: '#f5f5f7',
-  }
+  },
 };

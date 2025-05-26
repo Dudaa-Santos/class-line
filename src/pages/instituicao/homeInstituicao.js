@@ -1,6 +1,5 @@
 import React, { useState } from "react";
-import Logo from "../../img/logo/logo-branca-sFundo.png";
-import UserIcon from "../../img/sem-preenchimento/userIcon.png";
+import Fundo from "../../components/fundo"; 
 import iconeUsuario from "../../img/sem-preenchimento/user.png";
 import iconeTurma from "../../img/sem-preenchimento/cad-turma.png";
 import iconeCurso from "../../img/sem-preenchimento/curso.png";
@@ -21,12 +20,7 @@ function Home() {
   ];
 
   return (
-    <div style={styles.homeContainer}>
-      <nav style={styles.navbar}>
-        <img src={Logo} alt="Logo" style={styles.logo} />
-        <img src={UserIcon} alt="UserIcon" style={styles.userIcon} />
-      </nav>
-
+    <Fundo>
       <div style={styles.menuCentral}>
         <div style={styles.grid}>
           {botoes.map((botao, idx) => (
@@ -67,37 +61,13 @@ function Home() {
           ))}
         </div>
       </div>
-    </div>
+    </Fundo>
   );
 }
 
 export default Home;
 
 const styles = {
-  navbar: {
-    width: '100vw',
-    height: '80px',
-    background: '#092851',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: '0 30px',
-    boxSizing: 'border-box',
-  },
-  logo: {
-    height: '70px',
-    width: 'auto',
-    marginLeft: '30px',
-  },
-  userIcon: {
-    width: '36px',
-    height: '36px',
-    cursor: 'pointer',
-  },
-  homeContainer: {
-    minHeight: '100vh',
-    background: '#f5f5f7',
-  },
   menuCentral: {
     width: '100vw',
     minHeight: 'calc(100vh - 100px)', 
