@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
+
 import Fundo from "../../components/fundo"; 
 import iconeUsuario from "../../img/sem-preenchimento/user.png";
 import iconeTurma from "../../img/sem-preenchimento/cad-turma.png";
@@ -11,9 +13,9 @@ function Home() {
   const [hoveredIdx, setHoveredIdx] = useState(null);
 
   const botoes = [
-    { label: "Cadastrar Usuário", icon: iconeUsuario },
-    { label: "Cadastrar Turma", icon: iconeTurma },
-    { label: "Cadastrar Curso", icon: iconeCurso },
+    { label: "Cadastrar Usuário", icon: iconeUsuario, href: "/cadastro-usuarios" },
+    { label: "Cadastrar Turma", icon: iconeTurma, href: "/cadastro-turma" },
+    { label: "Cadastrar Curso", icon: iconeCurso, href: "/cadastro-curso" },
     { label: "Alunos", icon: iconeAluno },
     { label: "Professores", icon: iconeProfessor },
     { label: "Turmas", icon: iconeTurmas },
@@ -23,8 +25,12 @@ function Home() {
     <Fundo>
       <div style={styles.menuCentral}>
         <div style={styles.grid}>
-          {botoes.map((botao, idx) => (
-            <div
+        {botoes.map((botao, idx) => {
+          const CardWrapper = botao.href ? Link : "div";
+
+          return (
+            <CardWrapper
+              to={botao.href}
               key={idx}
               style={{
                 ...styles.card,
@@ -34,6 +40,8 @@ function Home() {
                     : styles.card.boxShadow,
                 transform: hoveredIdx === idx ? "scale(1.04)" : "scale(1)",
                 transition: "box-shadow 0.1s, transform 0.1s",
+                textDecoration: "none",
+                color: "inherit",
               }}
               onMouseEnter={() => setHoveredIdx(idx)}
               onMouseLeave={() => setHoveredIdx(null)}
@@ -57,8 +65,9 @@ function Home() {
                 />
               </div>
               <span style={styles.label}>{botao.label}</span>
-            </div>
-          ))}
+            </CardWrapper>
+          );
+        })}
         </div>
       </div>
     </Fundo>

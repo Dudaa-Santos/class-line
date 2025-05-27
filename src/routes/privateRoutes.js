@@ -1,13 +1,11 @@
-import React, { useContext } from "react";
-import { Navigate, Outlet } from "react-router-dom";
-import AuthContext from "../context/authContext";
+import React from "react";
+import { Navigate } from "react-router-dom";
 
-export default function PrivateRoute() {
-  const { isAutenticado, loading } = useContext(AuthContext);
+const PrivateRoute = ({ children }) => {
+  const token = localStorage.getItem("token");
+  const isAuthenticated = !!token;
 
-  if (loading) {
-    return <div>Carregando...</div>; 
-  }
+  return isAuthenticated ? children : <Navigate to="/login-professor" />;
+};
 
-  return isAutenticado ? <Outlet /> : <Navigate to="/login-professor" />;
-}
+export default PrivateRoute;

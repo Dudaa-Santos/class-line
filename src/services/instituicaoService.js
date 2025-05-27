@@ -7,7 +7,6 @@ const loginInstituicao = async (email, senha) => {
       senha
     });
     
-
     return response.data;
   } catch (error) {
     throw error;
