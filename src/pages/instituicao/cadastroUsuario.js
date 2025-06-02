@@ -49,7 +49,7 @@ export default function CadastroUsuario() {
               <option value="O">Outro</option>
             </select>
             <input name="telefone" style={styles.input} placeholder="Telefone" />
-            <input name="endereco" style={styles.input} placeholder="Endereço" />
+            <input name="endereco " style={styles.input} placeholder="Endereço" />
 
             {/* LINHA 3 */}
             <input name="bairro" style={styles.input} placeholder="Bairro" />
@@ -183,7 +183,7 @@ const styles = {
     marginTop: '30px',
   },
   botaoCancelar: {
-    backgroundColor: '#FF7900',
+    backgroundColor: '#FD750D',
     color: '#fff',
     border: 'none',
     padding: '12px 40px',
@@ -193,7 +193,7 @@ const styles = {
     fontFamily: 'Lexend, sans-serif',
   },
   botaoCadastrar: {
-    backgroundColor: '#1DAA55',
+    backgroundColor: '#27AE60',
     color: '#fff',
     border: 'none',
     padding: '12px 40px',

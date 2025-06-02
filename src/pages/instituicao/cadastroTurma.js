@@ -77,9 +77,9 @@ export default function CadastroTurma() {
               required
             >
               <option value="">Curso</option>
-              <option value="ADMINISTRACAO">Administração</option>
-              <option value="ENFERMAGEM">Enfermagem</option>
-              <option value="ENGENHARIA">Engenharia</option>
+              <option value="ENGENHARIA_DE_SOFTWARE">Engenharia de Software</option>
+              <option value="CIENCIAS_DA_COMPUTACAO">Ciências da Computação</option>
+              <option value="ANALISE_E_DESENVOLVIMENTO_DE_SISTEMAS">Análise e Desenvolvimento de Sistemas</option>
             </select>
 
             {/* BOTOES */}
@@ -153,7 +153,7 @@ const styles = {
     marginTop: '50px',  
   },
   botaoCancelar: {
-    backgroundColor: '#FF7900',
+    backgroundColor: '#FD750D',
     color: '#fff',
     border: 'none',
     padding: '12px 40px',
@@ -163,7 +163,7 @@ const styles = {
     fontFamily: 'Lexend, sans-serif',
   },
   botaoCadastrar: {
-    backgroundColor: '#1DAA55',
+    backgroundColor: '#27AE60',
     color: '#fff',
     border: 'none',
     padding: '12px 40px',

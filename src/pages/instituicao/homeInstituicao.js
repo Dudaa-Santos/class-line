@@ -16,9 +16,9 @@ function Home() {
     { label: "Cadastrar Usuário", icon: iconeUsuario, href: "/cadastro-usuarios" },
     { label: "Cadastrar Turma", icon: iconeTurma, href: "/cadastro-turma" },
     { label: "Cadastrar Curso", icon: iconeCurso, href: "/cadastro-curso" },
-    { label: "Alunos", icon: iconeAluno },
-    { label: "Professores", icon: iconeProfessor },
-    { label: "Turmas", icon: iconeTurmas },
+    { label: "Alunos", icon: iconeAluno, href: "/alunos"},
+    { label: "Professores", icon: iconeProfessor, href: "/professores"},
+    { label: "Turmas", icon: iconeTurmas, href: "/turmas" },
   ];
 
   return (

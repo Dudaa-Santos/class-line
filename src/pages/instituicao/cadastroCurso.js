@@ -157,7 +157,7 @@ const styles = {
     marginTop: '50px',  
   },
   botaoCancelar: {
-    backgroundColor: '#FF7900',
+    backgroundColor: '#FD750D',
     color: '#fff',
     border: 'none',
     padding: '12px 40px',
@@ -167,7 +167,7 @@ const styles = {
     fontFamily: 'Lexend, sans-serif',
   },
   botaoCadastrar: {
-    backgroundColor: '#1DAA55',
+    backgroundColor: '#27AE60',
     color: '#fff',
     border: 'none',
     padding: '12px 40px',

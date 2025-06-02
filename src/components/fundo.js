@@ -39,6 +39,6 @@ navbar: {
   },
   Container: {
     minHeight: '100vh',
-    background: '#f5f5f7',
+    background: '#FCFCFC',
   },
 };
