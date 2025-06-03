@@ -1,24 +1,33 @@
-import React, { useState /*, useEffect*/ } from 'react';
+import React, { useEffect, useState } from 'react';
 import Fundo from '../../components/fundo-nav';
 import { FaFilter, FaEdit } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
+import instituicaoService from '../../services/instituicaoService';
 
 function Alunos() {
   const [mostrarFiltro, setMostrarFiltro] = useState(false);
-  // const [alunos, setAlunos] = useState([]);
-  // useEffect(() => {
-  //   fetch('/api/alunos')
-  //     .then(res => res.json())
-  //     .then(data => setAlunos(data));
-  // }, []);
-
-  // Dados fictícios temporários
-  const alunos = [
-    { id: 1, matricula: '2023001', nome: 'Ana Souza', curso: 'Análise e Desenvolvimento de Sistemas' },
-    { id: 2, matricula: '2023002', nome: 'Carlos Lima', curso: 'Ciências da Computação' },
-    { id: 3, matricula: '2023003', nome: 'Fernanda Alves', curso: 'Engenharia de Software' },
-  ];
+  const [alunos, setAlunos] = useState([]);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    async function carregarAlunos() {
+      try {
+        const idInstituicao = localStorage.getItem('id_instituicao');
+        const token = localStorage.getItem('token');
+        if (!idInstituicao) return;
+        console.log('ID Instituição:', idInstituicao);
+        console.log('Token:', token);
+        const alunosData = await instituicaoService.buscarAluno(idInstituicao, token);
+        setAlunos(alunosData);
+      } catch (error) {
+        console.error('Erro ao buscar alunos:', error);
+        setAlunos([]);
+        alert('Erro ao buscar alunos.');
+      }
+    }
+
+    carregarAlunos();
+  }, []);
 
   return (
     <Fundo>
@@ -41,33 +50,48 @@ function Alunos() {
           <table style={styles.table}>
             <thead>
               <tr>
-                <th style={styles.th}>Matrícula</th>
                 <th style={styles.th}>Nome</th>
                 <th style={styles.th}>Curso</th>
+                <th style={styles.th}>Turma</th>
+                <th style={styles.th}>Email</th>
+                <th style={styles.th}>Turno</th>
+                <th style={styles.th}>Status</th>
                 <th style={styles.thAcoes}>Ações</th>
               </tr>
             </thead>
             <tbody>
               {alunos.map((aluno) => (
                 <tr key={aluno.id}>
-                  <td style={styles.td}>{aluno.matricula}</td>
                   <td style={styles.td}>{aluno.nome}</td>
-                  <td style={styles.td}>{aluno.curso}</td>
+                  <td style={styles.td}>{aluno.curso?.nome || '—'}</td>
+                  <td style={styles.td}>{aluno.turma?.nome || '—'}</td>
+                  <td style={styles.td}>{aluno.email}</td>
+                  <td style={styles.td}>{aluno.turno}</td>
+                  <td style={styles.td}>{aluno.status}</td>
                   <td style={styles.tdAcoes}>
                     <div style={{ display: 'flex', justifyContent: 'center' }}>
                       <FaEdit
                         style={styles.editIcon}
-                        onClick={() => navigate('/cadastro-aluno', {
-                          state: {
-                            modo: 'edicao',
-                            aluno,
-                          },
-                        })}
+                        onClick={() =>
+                          navigate('/cadastro-aluno', {
+                            state: {
+                              modo: 'edicao',
+                              aluno,
+                            },
+                          })
+                        }
                       />
                     </div>
                   </td>
                 </tr>
               ))}
+              {alunos.length === 0 && (
+                <tr>
+                  <td colSpan={7} style={{ textAlign: 'center', color: '#999', padding: '24px 0' }}>
+                    Nenhum aluno cadastrado.
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
@@ -125,8 +149,6 @@ const styles = {
     width: '100%',
     borderCollapse: 'collapse',
     backgroundColor: '#fff',
-    borderRadius: '10px',
-    alignItems: 'center',
   },
   th: {
     textAlign: 'left',

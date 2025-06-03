@@ -48,6 +48,8 @@ const cadastrarCurso = async (idInstituicao, data, token) => {
 };
 
 const buscarCursos = async (idInstituicao, token) => {
+    console.log('ID Instituição:', idInstituicao);
+
   const response = await httpClient.get(
     `/curso/instituicao/${idInstituicao}`,
     { 
@@ -65,7 +67,11 @@ const cadastrarTurma = async (idCurso, data, token) => {
   const response = await httpClient.post(
     `/turma/${idCurso}`,
     data,
-    { headers: { Authorization: `Bearer ${token}` } }
+    { 
+      headers: { 
+        Authorization: `Bearer ${token}` 
+      } 
+    }
   );
   return response.data;
 };
@@ -73,12 +79,16 @@ const cadastrarTurma = async (idCurso, data, token) => {
 const buscarProfessores = async (idInstituicao, token) => {
   const response = await httpClient.get(
     `/professor/instituicao/${idInstituicao}`,
-    { headers: { Authorization: `Bearer ${token}` } }
+    { 
+      headers: { 
+        Authorization: `Bearer ${token}` 
+      } 
+    }
   );
   return response.data; 
 };
 
-const buscarTurmas = async (idCurso, token) => {
+const buscarTurmasPorCurso = async (idCurso, token) => {
   console.log(idCurso)
   const response = await httpClient.get(
     `/turma/curso/${idCurso}`,
@@ -109,6 +119,71 @@ const cadastrarAluno = async (idInstituicao, data, token) => {
   }
 };
 
+const buscarAluno = async (idInstituicao, token) => {
+  try {
+    const response = await httpClient.get(
+      `/aluno/instituicao/${idInstituicao}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+const editarProfessor = async (idProfessor, idInstituicao, data, token) => {
+  try {
+    const response = await httpClient.put(
+      `/professor/${idInstituicao}/${idProfessor}`,
+      data,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+const editarAluno = async (idAluno, data, token) => {
+  try {
+    const response = await httpClient.put(
+      `/aluno/${idAluno}`,
+      data,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+const buscarTurmas = async (idInstituicao, token) => {
+  console.log(idInstituicao)
+  const response = await httpClient.get(
+    `/turma/instituicao/${idInstituicao}`,
+    { 
+      headers: { 
+        Authorization: `Bearer ${token}` 
+      } 
+    }
+  );
+  console.log(response.data);
+  return response.data;
+};
+
+
 const instituicaoService = {
   loginInstituicao,
   cadastrarProfessor,
@@ -116,8 +191,12 @@ const instituicaoService = {
   buscarCursos,
   cadastrarTurma,
   buscarProfessores,
-  buscarTurmas,
-  cadastrarAluno
+  buscarTurmasPorCurso,
+  cadastrarAluno,
+  buscarAluno,
+  editarProfessor,
+  editarAluno,
+  buscarTurmas
 };
 
 export default instituicaoService;

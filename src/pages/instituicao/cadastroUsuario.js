@@ -6,17 +6,17 @@ import instituicaoService from '../../services/instituicaoService';
 
 function maskCPF(value) {
   return value
-    .replace(/\D/g, '') 
-    .replace(/(\d{3})(\d)/, '$1.$2') 
+    .replace(/\D/g, '')
+    .replace(/(\d{3})(\d)/, '$1.$2')
     .replace(/(\d{3})(\d)/, '$1.$2')
     .replace(/(\d{3})(\d{1,2})$/, '$1-$2');
 }
 
 function maskTelefone(value) {
   return value
-    .replace(/\D/g, '') 
-    .replace(/^(\d{2})(\d)/g, '($1) $2') 
-    .replace(/(\d{5})(\d)/, '$1-$2') 
+    .replace(/\D/g, '')
+    .replace(/^(\d{2})(\d)/g, '($1) $2')
+    .replace(/(\d{5})(\d)/, '$1-$2')
     .slice(0, 15);
 }
 
@@ -37,7 +37,7 @@ export default function CadastroUsuario() {
     numero: '',
     cidade: '',
     senha: '',
-    turno: '',
+    turno: '',            // permanece no form
     id_curso: '',
     id_turma: '',
     dt_inicio: '',
@@ -48,17 +48,16 @@ export default function CadastroUsuario() {
   });
   const navigate = useNavigate();
 
-  const token = localStorage.getItem('token');
+  // Carrega cursos ao montar
   useEffect(() => {
+    const token = localStorage.getItem('token');
     async function carregarCursos() {
       try {
         const idInstituicao = localStorage.getItem('id_instituicao');
-        
         if (!idInstituicao) return;
 
         const cursosData = await instituicaoService.buscarCursos(idInstituicao, token);
         setCursos(cursosData);
-
       } catch (error) {
         console.error('Erro ao buscar listas de cursos:', error);
         alert('Não foi possível carregar cursos.');
@@ -67,21 +66,23 @@ export default function CadastroUsuario() {
     carregarCursos();
   }, []);
 
+  // Carrega turmas sempre que id_curso mudar
   useEffect(() => {
+    const token = localStorage.getItem('token');
     if (!form.id_curso) {
       setTurmas([]);
-      setForm((prev) => ({ ...prev, id_turma: "" }));
+      setForm((prev) => ({ ...prev, id_turma: '', turno: '' }));
       return;
     }
 
     async function carregarTurmas() {
       try {
-        const turmasData = await instituicaoService.buscarTurmas(form.id_curso, token);
+        const turmasData = await instituicaoService.buscarTurmasPorCurso(form.id_curso, token);
         setTurmas(turmasData);
       } catch (error) {
         setTurmas([]);
-        setForm((prev) => ({ ...prev, id_turma: "" }));
-        alert("Não foi possível carregar turmas.");
+        setForm((prev) => ({ ...prev, id_turma: '', turno: '' }));
+        alert('Não foi possível carregar turmas.');
       }
     }
     carregarTurmas();
@@ -89,6 +90,18 @@ export default function CadastroUsuario() {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+    // Se mudou a turma, atualiza também o turno com o da turma escolhida
+    if (name === 'id_turma') {
+      const turmaSelecionada = turmas.find((t) => String(t.idTurma) === value);
+      const turnoDaTurma = turmaSelecionada ? turmaSelecionada.turno : '';
+      setForm((prev) => ({
+        ...prev,
+        [name]: value,
+        turno: turnoDaTurma,
+      }));
+      return;
+    }
+
     setForm((prev) => ({
       ...prev,
       [name]:
@@ -118,9 +131,10 @@ export default function CadastroUsuario() {
 
   const handleTipoUsuario = (e) => {
     setTipoUsuario(e.target.value);
-    // Limpar campos específicos ao trocar de tipo
+    // Limpar campos específicos ao trocar tipo
     setForm((prev) => ({
       ...prev,
+      turno: '',
       id_curso: '',
       id_turma: '',
       dt_inicio: '',
@@ -129,6 +143,7 @@ export default function CadastroUsuario() {
       dt_admissao: '',
       diploma: '',
     }));
+    setTurmas([]);
     setNomeArquivo('');
   };
 
@@ -162,13 +177,14 @@ export default function CadastroUsuario() {
       return;
     }
 
-    // Validação mínima de campos comuns
+    // Validação comum
     if (!form.nome || !form.email || !form.cpf) {
       alert('Preencha pelo menos Nome, Email e CPF.');
       return;
     }
 
     if (tipoUsuario === 'ALUNO') {
+      // Validação de aluno
       if (!form.id_curso) {
         alert('Selecione um curso.');
         return;
@@ -179,6 +195,11 @@ export default function CadastroUsuario() {
       }
       if (!form.dt_inicio) {
         alert('Informe a data de matrícula.');
+        return;
+      }
+      // Turno já foi preenchido automaticamente ao escolher a turma
+      if (!form.turno) {
+        alert('O turno da turma não foi carregado corretamente.');
         return;
       }
 
@@ -194,9 +215,9 @@ export default function CadastroUsuario() {
         numero: form.numero,
         cidade: form.cidade,
         senha: form.senha,
-        turno: form.turno,
-        id_curso: form.id_curso,           
-        id_turma: form.id_turma,           
+        turno: form.turno,       // turno da turma
+        id_curso: form.id_curso,
+        id_turma: form.id_turma,
         dt_inicio: form.dt_inicio,
       };
 
@@ -212,8 +233,13 @@ export default function CadastroUsuario() {
     }
 
     if (tipoUsuario === 'PROFESSOR') {
+      // Validação de professor
       if (!form.formacao || !form.area_atuacao || !form.dt_admissao) {
         alert('Preencha Formação, Área de Atuação e Data de Admissão.');
+        return;
+      }
+      if (!form.turno) {
+        alert('Selecione um turno para o professor.');
         return;
       }
 
@@ -229,7 +255,7 @@ export default function CadastroUsuario() {
         numero: form.numero,
         cidade: form.cidade,
         senha: form.senha,
-        turno: form.turno,
+        turno: form.turno,        // turno selecionado manualmente
         formacao: form.formacao,
         diploma: form.diploma || 'nenhum arquivo selecionado',
         dt_admissao: form.dt_admissao,
@@ -256,7 +282,7 @@ export default function CadastroUsuario() {
         <div style={styles.container}>
           <h2 style={styles.titulo}>Cadastro de Usuário</h2>
           <form style={styles.formulario} onSubmit={handleSubmit}>
-            {/* ============== LINHA 1 ============== */}
+            {/* ========== LINHA 1 ========== */}
             <input
               name="nome"
               style={styles.input}
@@ -281,7 +307,7 @@ export default function CadastroUsuario() {
               onChange={handleCPF}
             />
 
-            {/* ============== LINHA 2 ============== */}
+            {/* ========== LINHA 2 ========== */}
             <input
               name="dt_nascimento"
               type="text"
@@ -322,7 +348,7 @@ export default function CadastroUsuario() {
               onChange={handleChange}
             />
 
-            {/* ============== LINHA 3 ============== */}
+            {/* ========== LINHA 3 ========== */}
             <input
               name="bairro"
               style={styles.input}
@@ -353,19 +379,7 @@ export default function CadastroUsuario() {
               onChange={handleChange}
             />
 
-            {/* ============== LINHA 4 ============== */}
-            <select
-              name="turno"
-              style={styles.input}
-              value={form.turno}
-              onChange={handleChange}
-            >
-              <option value="">Turno</option>
-              <option value="MANHA">Manhã</option>
-              <option value="TARDE">Tarde</option>
-              <option value="NOITE">Noite</option>
-              <option value="INTEGRAL">Integral</option>
-            </select>
+            {/* ========== LINHA 4 ========== */}
             <select
               name="tipoUsuario"
               style={styles.input}
@@ -377,9 +391,10 @@ export default function CadastroUsuario() {
               <option value="PROFESSOR">Professor</option>
             </select>
 
+            {/* ========== CAMPOS PARA ALUNO ========== */}
             {tipoUsuario === 'ALUNO' && (
               <>
-                  <input
+                <input
                   name="dt_inicio"
                   type="text"
                   placeholder="Data da Matrícula"
@@ -411,7 +426,7 @@ export default function CadastroUsuario() {
                   style={styles.input}
                   value={form.id_turma}
                   onChange={handleChange}
-                  disabled={form.id_curso === ''} 
+                  disabled={!form.id_curso}
                 >
                   <option value="">Selecione a Turma</option>
                   {turmas.map((turma) => (
@@ -421,11 +436,34 @@ export default function CadastroUsuario() {
                   ))}
                 </select>
 
+                {/* Mostra o turno da turma selecionada */}
+                <input
+                  name="turno"
+                  style={{ ...styles.input, backgroundColor: '#f0f0f0', cursor: 'not-allowed' }}
+                  value={form.turno}
+                  disabled
+                  placeholder="Turno"
+                />
               </>
             )}
 
+            {/* ========== CAMPOS PARA PROFESSOR ========== */}
             {tipoUsuario === 'PROFESSOR' && (
               <>
+                {/* Turno do professor */}
+                <select
+                  name="turno"
+                  style={styles.input}
+                  value={form.turno}
+                  onChange={handleChange}
+                >
+                  <option value="">Turno</option>
+                  <option value="MANHA">Manhã</option>
+                  <option value="TARDE">Tarde</option>
+                  <option value="NOITE">Noite</option>
+                  <option value="INTEGRAL">Integral</option>
+                </select>
+
                 <div style={styles.grid3}>
                   <select
                     name="formacao"
@@ -460,6 +498,7 @@ export default function CadastroUsuario() {
                     style={styles.input}
                   />
                 </div>
+
                 <div style={styles.fullWidth}>
                   <input
                     id="diploma"
@@ -493,6 +532,7 @@ export default function CadastroUsuario() {
               </>
             )}
 
+            {/* ========== BOTOÕES ========== */}
             <div style={styles.botoesContainer}>
               <button
                 type="button"

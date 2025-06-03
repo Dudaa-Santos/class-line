@@ -1,19 +1,32 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Fundo from '../../components/fundo-nav';
-import { FaFilter, FaEye, FaCog } from 'react-icons/fa';
+import { FaFilter, FaCog } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
+import instituicaoService from '../../services/instituicaoService';
 
 function Turmas() {
   const [mostrarFiltro, setMostrarFiltro] = useState(false);
+  const [turmas, setTurmas] = useState([]);
   const navigate = useNavigate();
 
-  // Dados fictícios temporários
-  const turmas = [
-    { id: 1, nome: 'Turma A', curso: 'ADS' },
-    { id: 2, nome: 'Turma B', curso: 'Engenharia de Software' },
-    { id: 3, nome: 'Turma C', curso: 'Ciência da Computação' },
-    { id: 4, nome: 'Turma D', curso: 'Sistemas de Informação' },
-  ];
+    useEffect(() => {
+    async function carregarTurmas() {
+      try {
+        const idInstituicao = localStorage.getItem('id_instituicao');
+        const token = localStorage.getItem('token');
+        if (!idInstituicao) return;
+
+        // aqui buscamos todas as turmas da instituição
+        const turmasData = await instituicaoService.buscarTurmas(idInstituicao, token);
+        setTurmas(turmasData);
+      } catch (error) {
+        console.error('Não foi possível carregar turmas:', error);
+        setTurmas([]);
+        alert('Não foi possível carregar turmas.');
+      }
+    }
+    carregarTurmas();
+  }, []);  // array vazio = executa apenas uma vez, ao montar
 
   return (
     <Fundo>
@@ -37,6 +50,10 @@ function Turmas() {
             <thead>
               <tr>
                 <th style={styles.th}>Nome</th>
+                <th style={styles.th}>Observação</th>
+                <th style={styles.th}>Turno</th>
+                <th style={styles.th}>Data Início</th>
+                <th style={styles.th}>Data Fim</th>
                 <th style={styles.th}>Curso</th>
                 <th style={styles.thAcoes}>Ações</th>
               </tr>
@@ -45,9 +62,21 @@ function Turmas() {
               {turmas.map((turma) => (
                 <tr key={turma.id}>
                   <td style={styles.td}>{turma.nome}</td>
-                  <td style={styles.td}>{turma.curso}</td>
+                  <td style={styles.td}>{turma.observacao || '—'}</td>
+                  <td style={styles.td}>{turma.turno}</td>
+                  <td style={styles.td}>
+                    {turma.dt_inicio
+                      ? new Date(turma.dt_inicio).toLocaleDateString('pt-BR')
+                      : '—'}
+                  </td>
+                  <td style={styles.td}>
+                    {turma.dt_fim
+                      ? new Date(turma.dt_fim).toLocaleDateString('pt-BR')
+                      : '—'}
+                  </td>
+                  <td style={styles.td}>{turma.curso?.nome || '—'}</td>
                   <td style={styles.tdAcoes}>
-                    <FaEye style={styles.eyeIcon} />
+                  <div style={styles.iconesAcoes}>
                     <FaCog
                       style={styles.cogIcon}
                       onClick={() =>
@@ -59,9 +88,17 @@ function Turmas() {
                         })
                       }
                     />
-                  </td>
+                  </div>
+                </td>
                 </tr>
               ))}
+              {turmas.length === 0 && (
+                <tr>
+                  <td colSpan={7} style={{ textAlign: 'center', color: '#999', padding: '24px 0' }}>
+                    Nenhuma turma cadastrada.
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
@@ -85,64 +122,69 @@ const styles = {
     padding: '30px 40px',
     fontFamily: 'Lexend, sans-serif',
     position: 'relative',
-    backgroundColor: '#fff',
+    backgroundColor: '#f6f6f6',
   },
   header: {
     display: 'flex',
+    justifyContent: 'space-between',
     alignItems: 'center',
+    marginBottom: '30px',
     position: 'relative',
-    marginBottom: '20px',
   },
   filterButton: {
-    fontSize: '26px',
+    fontSize: '24px',
     color: '#FD750D',
     cursor: 'pointer',
-    marginRight: '20px',
   },
   titulo: {
-    fontSize: '24px',
+    position: 'absolute',
+    left: '50%',
+    transform: 'translateX(-50%)',
+    fontSize: '28px',
     fontWeight: 'bold',
     color: '#002B65',
-    margin: '0 auto',
   },
   tabelaContainer: {
+    maxHeight: '60vh',
+    overflowY: 'auto',
+    overflowX: 'hidden',
     borderRadius: '10px',
-    overflow: 'hidden',
     backgroundColor: '#fff',
-    boxShadow: '0 0 10px rgba(0,0,0,0.05)',
+    boxShadow: '0 0 8px rgba(0,0,0,0.05)',
   },
   table: {
     width: '100%',
     borderCollapse: 'collapse',
+    backgroundColor: '#fff',
   },
   th: {
+    textAlign: 'left',
     backgroundColor: '#D9D9D9',
     padding: '14px',
     fontWeight: 600,
     fontSize: '15px',
     color: '#222',
-    borderBottom: '1px solid #ccc',
-    textAlign: 'left',
+    position: 'sticky',
+    top: 0,
+    zIndex: 1,
   },
   td: {
-    padding: '12px 14px',
+    padding: '14px 16px',
     fontSize: '14px',
     color: '#333',
-    borderBottom: '1px solid #eee',
+    borderTop: '1px solid #eee',
   },
   tdAcoes: {
-    padding: '12px 14px',
+    padding: '14px 16px',
+    fontSize: '14px',
+    color: '#333',
+    borderTop: '1px solid #eee',
     textAlign: 'center',
-    display: 'flex',
-    gap: '10px',
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderBottom: '1px solid #eee',
   },
   thAcoes: {
     textAlign: 'center',
     backgroundColor: '#D9D9D9',
-    padding: '16px',
+    padding: '14px',
     fontWeight: 600,
     fontSize: '15px',
     color: '#222',
@@ -178,5 +220,10 @@ const styles = {
     top: '60px',
     left: '30px',
     zIndex: 10,
+  },
+  iconesAcoes: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 };
