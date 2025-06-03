@@ -1,19 +1,80 @@
-import React, { useState } from 'react';
-import Fundo from '../../components/fundo'; 
-import { useNavigate } from 'react-router-dom'; 
+import React, { useEffect, useState } from 'react';
+import Fundo from '../../components/fundo-nav';
+import { useNavigate } from 'react-router-dom';
+import instituicaoService from '../../services/instituicaoService';
 
 export default function CadastroTurma() {
-  const [turno, setTurno] = useState('');
-  const [curso, setCurso] = useState('');
+  const [form, setForm] = useState({
+    nome: '',
+    observacao: '',
+    turno: '',
+    dt_inicio: '',
+    dt_fim: '',
+    id_curso: '', 
+  });
+  const [cursos, setCursos] = useState([]);
   const navigate = useNavigate();
+
+  // Busca cursos do banco ao carregar o componente
+  useEffect(() => {
+    async function carregarCursos() {
+      try {
+        const idInstituicao = localStorage.getItem('id_instituicao');
+        const token = localStorage.getItem('token');
+        const data = await instituicaoService.buscarCursos(idInstituicao, token);
+        setCursos(data);
+      } catch (error) {
+        alert('Erro ao buscar cursos');
+      }
+    }
+    carregarCursos();
+  }, []);
+
+  useEffect(() => {
+    console.log('Cursos carregados:', cursos);
+  }, [cursos]);
+
+  // Atualiza campos do form
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setForm((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
 
   const handleCancelar = () => {
     navigate('/home-instituicao');
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    alert('Turma cadastrada com sucesso!');
+
+    const idInstituicao = localStorage.getItem('id_instituicao');
+    const token = localStorage.getItem('token');
+
+    if (!idInstituicao || !token) {
+      alert('Instituição ou token não encontrado!');
+      return;
+    }
+
+    const data = {
+      nome: form.nome,
+      observacao: form.observacao,
+      turno: form.turno,
+      dt_inicio: form.dt_inicio,
+      dt_fim: form.dt_fim,
+    };
+
+    const curso = form.curso
+    try {
+      await instituicaoService.cadastrarTurma(curso, data, token);
+      alert('Turma cadastrada com sucesso!');
+      navigate('/home-instituicao');
+    } catch (error) {
+      alert('Erro ao cadastrar turma: ' + (JSON.stringify(error.response.data)));
+      // console.error('Erro ao cadastrar turma:', error);
+    }
   };
 
   return (
@@ -23,69 +84,90 @@ export default function CadastroTurma() {
           <div style={styles.tituloContainer}>
             <h2 style={styles.titulo}>Cadastrar Turma</h2>
           </div>
-
           <form style={styles.formulario} onSubmit={handleSubmit}>
             {/* LINHA 1 */}
-            <input name="nome" style={styles.input} placeholder="Nome da Turma" required />
-
             <input
-                name="dataInicio"
-                type="text"
-                placeholder="Data início"
-                onFocus={(e) => (e.target.type = 'date')}
-                onBlur={(e) => {
-                    if (!e.target.value) e.target.type = 'text';
-                }}
-                style={styles.input}
-                required
+              name="nome"
+              style={styles.input}
+              placeholder="Nome da Turma"
+              value={form.nome}
+              onChange={handleChange}
+              required
             />
 
             <input
-                name="dataFim"
-                type="text"
-                placeholder="Data fim"
-                onFocus={(e) => (e.target.type = 'date')}
-                onBlur={(e) => {
-                    if (!e.target.value) e.target.type = 'text';
-                }}
-                style={styles.input}
-                required
+              name="dt_inicio"
+              type="text"
+              placeholder="Data início"
+              value={form.dt_inicio}
+              onFocus={e => (e.target.type = 'date')}
+              onBlur={e => {
+                if (!e.target.value) e.target.type = 'text';
+              }}
+              onChange={handleChange}
+              style={styles.input}
+              required
             />
 
+            <input
+              name="dt_fim"
+              type="text"
+              placeholder="Data fim"
+              value={form.dt_fim}
+              onFocus={e => (e.target.type = 'date')}
+              onBlur={e => {
+                if (!e.target.value) e.target.type = 'text';
+              }}
+              onChange={handleChange}
+              style={styles.input}
+              required
+            />
 
             {/* LINHA 2 */}
-            <input name="observacoes" style={styles.input} placeholder="Observações" />
+            <input
+              name="observacao"
+              style={styles.input}
+              placeholder="Observações"
+              value={form.observacao}
+              onChange={handleChange}
+            />
 
             <select
               name="turno"
               style={styles.input}
-              value={turno}
-              onChange={(e) => setTurno(e.target.value)}
+              value={form.turno}
+              onChange={handleChange}
               required
             >
               <option value="">Turno</option>
               <option value="MANHA">Manhã</option>
               <option value="TARDE">Tarde</option>
               <option value="NOITE">Noite</option>
+              <option value="INTEGRAL">Integral</option>
             </select>
 
             <select
               name="curso"
               style={styles.input}
-              value={curso}
-              onChange={(e) => setCurso(e.target.value)}
+              value={form.curso}
+              onChange={handleChange}
               required
             >
               <option value="">Curso</option>
-              <option value="ENGENHARIA_DE_SOFTWARE">Engenharia de Software</option>
-              <option value="CIENCIAS_DA_COMPUTACAO">Ciências da Computação</option>
-              <option value="ANALISE_E_DESENVOLVIMENTO_DE_SISTEMAS">Análise e Desenvolvimento de Sistemas</option>
+              {cursos.map((curso) => (
+                <option key={curso.idCurso} value={curso.idCurso}>
+                  {curso.nome}
+                </option>
+              ))}
             </select>
 
-            {/* BOTOES */}
             <div style={styles.botoesContainer}>
-              <button type="button" style={styles.botaoCancelar} onClick={handleCancelar}>Cancelar</button>
-              <button type="submit" style={styles.botaoCadastrar}>Cadastrar</button>
+              <button type="button" style={styles.botaoCancelar} onClick={handleCancelar}>
+                Cancelar
+              </button>
+              <button type="submit" style={styles.botaoCadastrar}>
+                Cadastrar
+              </button>
             </div>
           </form>
         </div>
@@ -97,10 +179,10 @@ export default function CadastroTurma() {
 const styles = {
   wrapper: {
     display: 'flex',
-    flexDirection: 'column',          
-    justifyContent: 'center',         
-    alignItems: 'center',            
-    minHeight: 'calc(100vh - 60px)', 
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+    minHeight: 'calc(100vh - 60px)',
     paddingLeft: '20px',
     paddingRight: '20px',
     boxSizing: 'border-box',
@@ -108,16 +190,16 @@ const styles = {
   container: {
     padding: '40px',
     width: '100%',
-    maxWidth: '800px',
+    maxWidth: '1200px',
     fontFamily: 'Lexend, sans-serif',
     boxSizing: 'border-box',
     overflowX: 'hidden',
   },
   tituloContainer: {
-    height: 100,             
+    height: 100,
     display: 'flex',
-    justifyContent: 'center', 
-    alignItems: 'center',     
+    justifyContent: 'center',
+    alignItems: 'center',
     marginBottom: 30,
   },
   titulo: {
@@ -128,7 +210,7 @@ const styles = {
   },
   formulario: {
     display: 'grid',
-    gridTemplateColumns: '2fr 1fr 1fr', 
+    gridTemplateColumns: '2.5fr 2fr 2fr',
     gap: '20px',
     alignItems: 'center',
     width: '100%',
@@ -150,7 +232,7 @@ const styles = {
     display: 'flex',
     justifyContent: 'center',
     gap: '20px',
-    marginTop: '50px',  
+    marginTop: '50px',
   },
   botaoCancelar: {
     backgroundColor: '#FD750D',

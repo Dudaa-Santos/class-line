@@ -1,11 +1,23 @@
 import React from "react";
-import { Navigate } from "react-router-dom";
+import { Navigate, Outlet } from "react-router-dom";
 
-const PrivateRoute = ({ children }) => {
-  const token = localStorage.getItem("token");
-  const isAuthenticated = !!token;
+// Função para descobrir o tipo pelo localStorage
+function getTipoUsuario() {
+  if (localStorage.getItem("id_instituicao")) return "instituicao";
+  if (localStorage.getItem("id_professor")) return "professor";
+  return null;
+}
 
-  return isAuthenticated ? children : <Navigate to="/login-professor" />;
-};
+const isAuthenticated = () =>
+  !!(localStorage.getItem("id_instituicao") || localStorage.getItem("id_professor"));
 
-export default PrivateRoute;
+export default function PrivateRoute({ tipoPermitido }) {
+  if (!isAuthenticated()) {
+    return <Navigate to="/login-professor" />;
+  }
+  if (tipoPermitido && getTipoUsuario() !== tipoPermitido) {
+    // Redireciona se tentar acessar rota de outro perfil
+    return <Navigate to="/login-professor" />;
+  }
+  return <Outlet />;
+}

@@ -20,7 +20,7 @@ export default function LoginInstituicao() {
       const dados = await usuarioService.loginInstituicao(login, senha);
       console.log('Login bem-sucedido:', dados);
 
-      localStorage.setItem('usuario', JSON.stringify(dados));
+      localStorage.setItem('id_instituicao', dados.id);
       if (dados.token) {
         localStorage.setItem('token', dados.token);
       }

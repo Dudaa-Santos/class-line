@@ -1,5 +1,5 @@
 import React from "react";
-import Fundo from "../../components/fundo";
+import Fundo from "../../components/fundo-nav";
 
 function Home() {
   const turmas = [

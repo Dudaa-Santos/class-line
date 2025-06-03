@@ -8,28 +8,34 @@ import HomeProfessor from "../pages/professor/homeProfessor";
 import CadastroUsuario from "../pages/instituicao/cadastroUsuario";
 import CadastroTurma from "../pages/instituicao/cadastroTurma";
 import CadastroCurso from "../pages/instituicao/cadastroCurso";
-import Alunos from "../pages/instituicao/alunos"
+import Alunos from "../pages/instituicao/alunos";
 import Professores from "../pages/instituicao/professores";
 import Turmas from "../pages/instituicao/turmas";
-// import PrivateRoute from "./privateRoutes";
+import PrivateRoute from "./privateRoutes";
 
 const Rotas = () => {
   return (
     <HashRouter>
       <Routes>
         <Route path="/" element={<Navigate to="/login-professor" />} />
-        
+
         <Route path="/login-professor" element={<LoginProfessor />} />
         <Route path="/login-instituicao" element={<LoginInstituicao />} />
-        <Route path="/home-instituicao" element={<HomeInstituicao />} />
-        <Route path="/cadastro-usuarios" element={<CadastroUsuario />} />
-        <Route path="/cadastro-turma" element={<CadastroTurma />} />
-        <Route path="/cadastro-curso" element={<CadastroCurso />} />
-        <Route path="/alunos" element={<Alunos />} />
-        <Route path="/professores" element={<Professores />} />
-        <Route path="/turmas" element={<Turmas />} />
-        
-        <Route path="/home-professor" element={<HomeProfessor />} />
+
+        <Route element={<PrivateRoute tipoPermitido="instituicao" />}>
+          <Route path="/home-instituicao" element={<HomeInstituicao />} />
+          <Route path="/cadastro-usuarios" element={<CadastroUsuario />} />
+          <Route path="/cadastro-turma" element={<CadastroTurma />} />
+          <Route path="/cadastro-curso" element={<CadastroCurso />} />
+          <Route path="/alunos" element={<Alunos />} />
+          <Route path="/professores" element={<Professores />} />
+          <Route path="/turmas" element={<Turmas />} />
+        </Route>
+
+        <Route element={<PrivateRoute tipoPermitido="professor" />}>
+          <Route path="/home-professor" element={<HomeProfessor />} />
+        </Route>
+
         <Route path="*" element={<Navigate to="/login-professor" />} />
       </Routes>
     </HashRouter>

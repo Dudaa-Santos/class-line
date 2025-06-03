@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import Fundo from '../../components/fundo';
+import Fundo from '../../components/fundo-nav';
 import { FaFilter, FaEye, FaCog } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 
@@ -38,7 +38,7 @@ function Turmas() {
               <tr>
                 <th style={styles.th}>Nome</th>
                 <th style={styles.th}>Curso</th>
-                <th style={styles.th}>Ações</th>
+                <th style={styles.thAcoes}>Ações</th>
               </tr>
             </thead>
             <tbody>
@@ -138,6 +138,17 @@ const styles = {
     justifyContent: 'center',
     alignItems: 'center',
     borderBottom: '1px solid #eee',
+  },
+  thAcoes: {
+    textAlign: 'center',
+    backgroundColor: '#D9D9D9',
+    padding: '16px',
+    fontWeight: 600,
+    fontSize: '15px',
+    color: '#222',
+    position: 'sticky',
+    top: 0,
+    zIndex: 1,
   },
   eyeIcon: {
     color: '#27AE60',

@@ -1,6 +1,5 @@
 import React, { useState /*, useEffect*/ } from 'react';
-import Fundo from '../../components/fundo';
-import FiltroAlunos from '../../components/filtro';
+import Fundo from '../../components/fundo-nav';
 import { FaFilter, FaEdit } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 
@@ -34,11 +33,7 @@ function Alunos() {
 
         {mostrarFiltro && (
           <div style={styles.filtroOverlay}>
-            <FiltroAlunos
-              filtros={{}}
-              setFiltros={() => {}}
-              cursosDisponiveis={[]}
-            />
+            <div style={{ padding: '10px', background: '#eee' }}>Filtros (em breve)</div>
           </div>
         )}
 
@@ -49,7 +44,7 @@ function Alunos() {
                 <th style={styles.th}>Matrícula</th>
                 <th style={styles.th}>Nome</th>
                 <th style={styles.th}>Curso</th>
-                <th style={styles.th}>Ações</th>
+                <th style={styles.thAcoes}>Ações</th>
               </tr>
             </thead>
             <tbody>
@@ -157,6 +152,17 @@ const styles = {
     borderTop: '1px solid #eee',
     textAlign: 'center',
   },
+  thAcoes: {
+    textAlign: 'center',
+    backgroundColor: '#D9D9D9',
+    padding: '16px',
+    fontWeight: 600,
+    fontSize: '15px',
+    color: '#222',
+    position: 'sticky',
+    top: 0,
+    zIndex: 1,
+  },
   editIcon: {
     color: '#FFB703',
     cursor: 'pointer',
@@ -177,7 +183,7 @@ const styles = {
   },
   filtroOverlay: {
     position: 'absolute',
-    top: '40px',
+    top: '60px',
     left: '30px',
     zIndex: 10,
   },

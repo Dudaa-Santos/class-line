@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 
-import Fundo from "../../components/fundo"; 
+import Fundo from "../../components/fundo-nav"; 
 import iconeUsuario from "../../img/sem-preenchimento/user.png";
 import iconeTurma from "../../img/sem-preenchimento/cad-turma.png";
 import iconeCurso from "../../img/sem-preenchimento/curso.png";

@@ -1,20 +1,56 @@
 import React, { useState } from 'react';
-import Fundo from '../../components/fundo'; 
-import { useNavigate } from 'react-router-dom'; 
+import Fundo from '../../components/fundo-nav';
+import { useNavigate } from 'react-router-dom';
+import instituicaoService from '../../services/instituicaoService';
 
 export default function CadastroCurso() {
-  const [tipoCurso, setTipoCurso] = useState('');
-  const [turnos, setTurnos] = useState('');
-  const [semestres, setSemestres] = useState('');
+  const [form, setForm] = useState({
+    nome: '',
+    descricao: '',
+    qtde_semestres: '',
+    tipo: '',
+  });
   const navigate = useNavigate();
 
   const handleCancelar = () => {
     navigate('/home-instituicao');
   };
 
-  const handleSubmit = (e) => {
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setForm((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    alert('Curso cadastrado com sucesso!');
+
+    const idInstituicao = localStorage.getItem('id_instituicao');
+    // const idInstituicao = usuario ? JSON.parse(usuario).id : null;
+    const token = localStorage.getItem('token');
+
+    if (!idInstituicao || !token) {
+      alert('Instituição ou token não encontrado!');
+      return;
+    }
+
+    const data = {
+      nome: form.nome,
+      descricao: form.descricao,
+      qtde_semestres: Number(form.qtde_semestres),
+      tipo: form.tipo,
+    };
+
+    try {
+      const response = await instituicaoService.cadastrarCurso(idInstituicao, data, token)
+      console.log(response);
+      alert('Curso cadastrado com sucesso!');
+      navigate('/home-instituicao');
+    } catch (error) {
+      alert('Erro ao cadastrar curso: ' + (JSON.stringify(error.response.data)));
+    }
   };
 
   return (
@@ -26,61 +62,54 @@ export default function CadastroCurso() {
           </div>
 
           <form style={styles.formulario} onSubmit={handleSubmit}>
-            {/* Linha 1 - Nome */}
+            {/* Linha 1 - Nome e Descrição */}
             <input
               name="nome"
-              style={{ ...styles.input, gridColumn: 'span 3' }}
+              style={{ ...styles.input, gridColumn: 'span 2' }}
               placeholder="Nome do Curso"
+              value={form.nome}
+              onChange={handleChange}
+              required
+            />
+            <input
+              name="descricao"
+              style={{ ...styles.input, gridColumn: 'span 2' }}
+              placeholder="Descrição do Curso"
+              value={form.descricao}
+              onChange={handleChange}
               required
             />
 
-            {/* Linha 2 - Tipo de Curso, Turnos, Semestres */}
+            {/* Linha 2 - Tipo e Qtde Semestres */}
             <select
-              name="tipoCurso"
+              name="tipo"
               style={styles.input}
-              value={tipoCurso}
-              onChange={(e) => setTipoCurso(e.target.value)}
+              value={form.tipo}
+              onChange={handleChange}
               required
             >
               <option value="">Tipo de Curso</option>
-              <option value="GRADUACAO">Graduação</option>
+              <option value="TECNICO">Técnico</option>
+              <option value="BACHARELADO">Bacharelado</option>
               <option value="POSGRADUACAO">Pós-graduação</option>
-              <option value="TECNOLOGO">Tecnólogo</option>
+              <option value="MESTRADO">Mestrado</option>
+              <option value="DOUTORADO">Doutorado</option>
+              <option value="LICENCIATURA">Licenciatura</option>
+              <option value="EXTENSAO">Extensão</option>
             </select>
-
+            
             <select
-              name="turnos"
+              name="qtde_semestres"
               style={styles.input}
-              value={turnos}
-              onChange={(e) => setTurnos(e.target.value)}
+              value={form.qtde_semestres}
+              onChange={handleChange}
               required
             >
-              <option value="">Turnos Disponíveis</option>
-              <option value="MANHA">Manhã</option>
-              <option value="TARDE">Tarde</option>
-              <option value="NOITE">Noite</option>
-              <option value="INTEGRAL">Integral</option>
-            </select>
-
-            <select
-              name="semestres"
-              style={styles.input}
-              value={semestres}
-              onChange={(e) => setSemestres(e.target.value)}
-              required
-            >
-              <option value="">Quantidade de Semestres</option>
+              <option value="">Qtd. de Semestres</option>
               {[...Array(12)].map((_, i) => (
                 <option key={i + 1} value={i + 1}>{i + 1}</option>
               ))}
             </select>
-
-            {/* Linha 3 - Observações */}
-            <input
-              name="observacoes"
-              style={{ ...styles.input, gridColumn: 'span 3' }}
-              placeholder="Observações"
-            />
 
             {/* Botões */}
             <div style={styles.botoesContainer}>
@@ -101,10 +130,10 @@ export default function CadastroCurso() {
 const styles = {
   wrapper: {
     display: 'flex',
-    flexDirection: 'column',          
-    justifyContent: 'center',         
-    alignItems: 'center',            
-    minHeight: 'calc(100vh - 60px)', 
+    justifyContent: 'center',
+    alignItems: 'center',
+    minHeight: 'calc(100vh - 64px)',
+    paddingTop: '0px',
     paddingLeft: '20px',
     paddingRight: '20px',
     boxSizing: 'border-box',
@@ -112,31 +141,25 @@ const styles = {
   container: {
     padding: '40px',
     width: '100%',
-    maxWidth: '800px',
+    maxWidth: '900px',
     fontFamily: 'Lexend, sans-serif',
     boxSizing: 'border-box',
     overflowX: 'hidden',
   },
   tituloContainer: {
-    height: 100,             
-    display: 'flex',
-    justifyContent: 'center', 
-    alignItems: 'center',     
-    marginBottom: 30,
+    marginBottom: '30px',
+    textAlign: 'center',
   },
   titulo: {
-    textAlign: 'center',
     color: '#002B65',
     fontFamily: 'Lexend, sans-serif',
-    margin: 0,
   },
   formulario: {
     display: 'grid',
-    gridTemplateColumns: '1.8fr 2.5fr 2.5fr',
+    gridTemplateColumns: 'repeat(2, 1fr)',
     gap: '20px',
     alignItems: 'center',
     width: '100%',
-    marginBottom: '20px',
   },
   input: {
     padding: '14px',
@@ -150,11 +173,11 @@ const styles = {
     boxSizing: 'border-box',
   },
   botoesContainer: {
-    gridColumn: 'span 3',
+    gridColumn: 'span 2',
     display: 'flex',
     justifyContent: 'center',
     gap: '20px',
-    marginTop: '50px',  
+    marginTop: '30px',
   },
   botaoCancelar: {
     backgroundColor: '#FD750D',

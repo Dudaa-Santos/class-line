@@ -70,7 +70,6 @@ export default function LoginProfessor() {
             <button type="submit" style={styles.button}>Acessar</button>
             </form>
         </div>
-
         <p style={styles.linkInstituicao}>
           Clique aqui para fazer login como{" "}
           <Link to="/login-instituicao" style={styles.linkSpan}>
