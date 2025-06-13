@@ -15,14 +15,33 @@ function Alunos() {
         const idInstituicao = localStorage.getItem('id_instituicao');
         const token = localStorage.getItem('token');
         if (!idInstituicao) return;
-        console.log('ID Instituição:', idInstituicao);
-        console.log('Token:', token);
-        const alunosData = await instituicaoService.buscarAluno(idInstituicao, token);
-        setAlunos(alunosData);
+
+        const [alunosData, cursosData, turmasData] = await Promise.all([
+          instituicaoService.buscarAluno(idInstituicao, token),
+          instituicaoService.buscarCursos(idInstituicao, token),
+          instituicaoService.buscarTurmas(idInstituicao, token)
+        ]);
+
+        const cursosMap = new Map(cursosData.map(curso => [curso.id, curso.nome]));
+        const turmasMap = new Map(turmasData.map(turma => [turma.id, turma.nome]));
+
+        const alunosEnriquecidos = alunosData.map(aluno => {
+          const nomeCurso = cursosMap.get(aluno.id_curso) || '-';
+          const nomeTurma = turmasMap.get(aluno.id_turma) || '-';
+          
+          return {
+            ...aluno,
+            nomeCurso,
+            nomeTurma
+          };
+        });
+
+        setAlunos(alunosEnriquecidos);
+
       } catch (error) {
-        console.error('Erro ao buscar alunos:', error);
+        console.error('Erro ao buscar dados:', error);
         setAlunos([]);
-        alert('Erro ao buscar alunos.');
+        alert('Erro ao buscar dados da página.');
       }
     }
 
@@ -42,7 +61,7 @@ function Alunos() {
 
         {mostrarFiltro && (
           <div style={styles.filtroOverlay}>
-            <div style={{ padding: '10px', background: '#eee' }}>Filtros (em breve)</div>
+            <div style={{ padding: '10px', background: '#d9d9d9' }}>Filtros (em breve)</div>
           </div>
         )}
 
@@ -63,8 +82,8 @@ function Alunos() {
               {alunos.map((aluno) => (
                 <tr key={aluno.id}>
                   <td style={styles.td}>{aluno.nome}</td>
-                  <td style={styles.td}>{aluno.curso?.nome || '—'}</td>
-                  <td style={styles.td}>{aluno.turma?.nome || '—'}</td>
+                  <td style={styles.td}>{aluno.nomeCurso}</td>
+                  <td style={styles.td}>{aluno.nomeTurma}</td>
                   <td style={styles.td}>{aluno.email}</td>
                   <td style={styles.td}>{aluno.turno}</td>
                   <td style={styles.td}>{aluno.status}</td>
@@ -73,7 +92,7 @@ function Alunos() {
                       <FaEdit
                         style={styles.editIcon}
                         onClick={() =>
-                          navigate('/cadastro-aluno', {
+                          navigate('/cadastro-usuario', {
                             state: {
                               modo: 'edicao',
                               aluno,

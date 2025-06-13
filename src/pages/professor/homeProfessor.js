@@ -1,42 +1,79 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Fundo from "../../components/fundo-nav";
+import professorService from "../../services/professorService";
+import { useNavigate } from "react-router-dom";
+
+const coresTurmas = [
+  "#4B9EFF",
+  "#36B76C",
+  "#F4B43E",
+  "#A186E8",
+  "#28C3B4"
+];
 
 function Home() {
-  const turmas = [
-    { nome: "ADS-2025-1", cor: "#4B9EFF" },
-    { nome: "ADS-2025-2", cor: "#36B76C" },
-    { nome: "SI - 2025", cor: "#F4B43E" },
-    { nome: "ENG - SOFT 2025", cor: "#A186E8" },
-    { nome: "CT-DS - 2025", cor: "#28C3B4" },
-  ];
+  const [professor, setProfessor] = useState(null);
+  const [turmas, setTurmas] = useState([]);
+  const navigate = useNavigate(); // HOOK DE NAVEGAÇÃO
+
+  useEffect(() => {
+    const idProfessor = localStorage.getItem("id_professor");
+    const token = localStorage.getItem("token");
+
+    if (!idProfessor || !token) return;
+
+    professorService.buscarProfessor(idProfessor, token)
+      .then(data => setProfessor(data))
+      .catch(() => setProfessor(null));
+
+    professorService.buscarTurmaProfessor(idProfessor, token)
+      .then(data => setTurmas(data))
+      .catch(() => setTurmas([]));
+  }, []);
 
   return (
     <Fundo>
       <div style={styles.content}>
-        <h2 style={styles.saudacao}>Olá, Professor Usuário!</h2>
-        <span style={styles.programacao}>Programação</span>
+        <h2 style={styles.saudacao}>
+          {professor ? `Olá, ${professor.nome}!` : "Olá, Professor!"}
+        </h2>
+        <span style={styles.areaAtuacao}>
+          {professor ? professor.area_atuacao : "Área de Atuação"}
+        </span>
         <h2 style={styles.tituloTurmas}>Minhas Turmas</h2>
         <div style={styles.turmasContainer}>
-          {turmas.map((turma, idx) => (
-            <div
-              key={idx}
-              style={{
-                ...styles.turmaCard,
-                background: `linear-gradient(0deg, #fff 65%, ${turma.cor} 35%)`,
-              }}
-            >
-              <div
-                style={{
-                  ...styles.turmaNome,
-                  background: turma.cor,
-                  color: "#fff",
-                }}
-              >
-                {turma.nome}
-              </div>
-              <button style={styles.botaoVerMais}>Ver Mais</button>
-            </div>
-          ))}
+          {turmas.length > 0 ? (
+            turmas.map((turma, idx) => {
+              const cor = coresTurmas[idx % coresTurmas.length];
+              return (
+                <div
+                  key={turma.id || idx}
+                  style={{
+                    ...styles.turmaCard,
+                    background: `linear-gradient(0deg, #fff 65%, ${cor} 35%)`,
+                  }}
+                >
+                  <div
+                    style={{
+                      ...styles.turmaNome,
+                      background: cor,
+                      color: "#fff",
+                    }}
+                  >
+                    {turma.nome}
+                  </div>
+                  <button
+                    style={styles.botaoVerMais}
+                    onClick={() => navigate(`/disciplinas/${turma.id}`)} 
+                  >
+                    Ver Mais
+                  </button>
+                </div>
+              );
+            })
+          ) : (
+            <span style={{ color: "#888" }}>Nenhuma turma cadastrada.</span>
+          )}
         </div>
       </div>
     </Fundo>
@@ -44,7 +81,6 @@ function Home() {
 }
 
 export default Home;
-
 
 const styles = {
   content: {
@@ -59,12 +95,12 @@ const styles = {
     marginBottom: 0,
     marginTop: '24px',
   },
-  programacao: {
+  areaAtuacao: {
     fontSize: '1.1rem',
     color: '#466190',
     marginTop: '8px',
     display: 'inline-block',
-    marginBottom: '30px',
+    marginBottom: '100px',
   },
   tituloTurmas: {
     marginTop: '48px',

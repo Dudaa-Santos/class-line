@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import Fundo from '../../components/fundo-nav';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import Upload from '../../img/sem-preenchimento/upload-icon.png';
 import instituicaoService from '../../services/instituicaoService';
 
+// Máscaras (mantendo igual ao Cadastro)
 function maskCPF(value) {
   return value
     .replace(/\D/g, '')
@@ -11,7 +12,6 @@ function maskCPF(value) {
     .replace(/(\d{3})(\d)/, '$1.$2')
     .replace(/(\d{3})(\d{1,2})$/, '$1-$2');
 }
-
 function maskTelefone(value) {
   return value
     .replace(/\D/g, '')
@@ -20,8 +20,10 @@ function maskTelefone(value) {
     .slice(0, 15);
 }
 
-export default function CadastroUsuario() {
-  const [tipoUsuario, setTipoUsuario] = useState('');
+export default function EdicaoUsuario() {
+  const navigate = useNavigate();
+  const { tipo, id } = useParams(); // /edicao-usuario/:tipo/:id
+
   const [nomeArquivo, setNomeArquivo] = useState('');
   const [cursos, setCursos] = useState([]);
   const [turmas, setTurmas] = useState([]);
@@ -46,27 +48,24 @@ export default function CadastroUsuario() {
     dt_admissao: '',
     diploma: '',
   });
-  const navigate = useNavigate();
 
-  // carrega cursos 
+  // Carrega cursos ao montar
   useEffect(() => {
     const token = localStorage.getItem('token');
     async function carregarCursos() {
       try {
         const idInstituicao = localStorage.getItem('id_instituicao');
         if (!idInstituicao) return;
-
         const cursosData = await instituicaoService.buscarCursos(idInstituicao, token);
         setCursos(cursosData);
       } catch (error) {
-        console.error('Erro ao buscar listas de cursos:', error);
         alert('Não foi possível carregar cursos.');
       }
     }
     carregarCursos();
   }, []);
 
-  // carrega turmas sempre que id_curso mudar
+  // Carrega turmas quando id_curso muda
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (!form.id_curso) {
@@ -74,12 +73,11 @@ export default function CadastroUsuario() {
       setForm((prev) => ({ ...prev, id_turma: '', turno: '' }));
       return;
     }
-
     async function carregarTurmas() {
       try {
         const turmasData = await instituicaoService.buscarTurmasPorCurso(form.id_curso, token);
         setTurmas(turmasData);
-      } catch (error) {
+      } catch {
         setTurmas([]);
         setForm((prev) => ({ ...prev, id_turma: '', turno: '' }));
         alert('Não foi possível carregar turmas.');
@@ -88,9 +86,36 @@ export default function CadastroUsuario() {
     carregarTurmas();
   }, [form.id_curso]);
 
+  // Busca usuário para edição
+  useEffect(() => {
+    async function fetchUsuario() {
+      const token = localStorage.getItem('token');
+      if (tipo === 'ALUNO') {
+        const aluno = await instituicaoService.buscarAlunoPorId(id, token); 
+        setForm({
+          ...aluno,
+          cpf: maskCPF(aluno.cpf || ''),
+          telefone: maskTelefone(aluno.telefone || ''),
+          endereco: aluno.logradouro || '',
+          senha: '', 
+        });
+      } else if (tipo === 'PROFESSOR') {
+        const prof = await instituicaoService.buscarProfessorPorId(id, token); 
+        setForm({
+          ...prof,
+          cpf: maskCPF(prof.cpf || ''),
+          telefone: maskTelefone(prof.telefone || ''),
+          endereco: prof.logradouro || '',
+          senha: '', 
+        });
+        setNomeArquivo(prof.diploma || '');
+      }
+    }
+    fetchUsuario();
+  }, [tipo, id]);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
-    // atualiza o turno com o da turma escolhida
     if (name === 'id_turma') {
       const turmaSelecionada = turmas.find((t) => String(t.idTurma) === value);
       const turnoDaTurma = turmaSelecionada ? turmaSelecionada.turno : '';
@@ -101,7 +126,6 @@ export default function CadastroUsuario() {
       }));
       return;
     }
-
     setForm((prev) => ({
       ...prev,
       [name]:
@@ -113,38 +137,12 @@ export default function CadastroUsuario() {
     }));
   };
 
-  const handleCPF = (e) => {
-    const { name, value } = e.target;
-    setForm((prev) => ({
-      ...prev,
-      [name]: name === 'cpf' ? maskCPF(value) : value,
-    }));
-  };
-
   const handleTelefone = (e) => {
     const { name, value } = e.target;
     setForm((prev) => ({
       ...prev,
-      [name]: name === 'telefone' ? maskTelefone(value) : value,
+      [name]: maskTelefone(value),
     }));
-  };
-
-  const handleTipoUsuario = (e) => {
-    setTipoUsuario(e.target.value);
-    // limpar campos específicos ao trocar tipo
-    setForm((prev) => ({
-      ...prev,
-      turno: '',
-      id_curso: '',
-      id_turma: '',
-      dt_inicio: '',
-      formacao: '',
-      area_atuacao: '',
-      dt_admissao: '',
-      diploma: '',
-    }));
-    setTurmas([]);
-    setNomeArquivo('');
   };
 
   const handleArquivoSelecionado = (e) => {
@@ -163,128 +161,66 @@ export default function CadastroUsuario() {
     }
   };
 
-  const handleCancelar = () => {
-    navigate('/home-instituicao');
-  };
+    const handleCancelar = () => {
+    if (tipo === 'PROFESSOR') {
+        navigate('/professores');
+    } else if (tipo === 'ALUNO') {
+        navigate('/alunos');
+    } else {
+        navigate('/home-instituicao');
+    }
+    };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    const idInstituicao = localStorage.getItem('id_instituicao');
     const token = localStorage.getItem('token');
-    if (!idInstituicao) {
-      alert('Instituição não encontrada!');
-      return;
-    }
-
-    if (!form.nome || !form.email || !form.cpf) {
-      alert('Preencha pelo menos Nome, Email e CPF.');
-      return;
-    }
-
-    if (tipoUsuario === 'ALUNO') {
-      if (!form.id_curso) {
-        alert('Selecione um curso.');
-        return;
-      }
-      if (!form.id_turma) {
-        alert('Selecione uma turma.');
-        return;
-      }
-      if (!form.dt_inicio) {
-        alert('Informe a data de matrícula.');
-        return;
-      }
-      if (!form.turno) {
-        alert('O turno da turma não foi carregado corretamente.');
-        return;
-      }
-
-      const dataAluno = {
-        nome: form.nome,
-        email: form.email,
-        cpf: form.cpf,
-        dt_nascimento: form.dt_nascimento,
-        genero: form.genero,
-        telefone: form.telefone,
-        logradouro: form.endereco,
-        bairro: form.bairro,
-        numero: form.numero,
-        cidade: form.cidade,
-        senha: form.senha,
-        turno: form.turno,       // turno da turma
-        id_curso: form.id_curso,
-        id_turma: form.id_turma,
-        dt_inicio: form.dt_inicio,
-      };
-
-      try {
-        await instituicaoService.cadastrarAluno(idInstituicao, dataAluno, token);
-        alert('Aluno cadastrado com sucesso!');
+    const idInstituicao = localStorage.getItem('id_instituicao');
+    try {
+      if (tipo === 'ALUNO') {
+        // Validar se necessário
+        const dataAluno = {
+          ...form,
+          logradouro: form.endereco,
+          id_curso: form.id_curso,
+          id_turma: form.id_turma,
+          dt_inicio: form.dt_inicio,
+          turno: form.turno,
+        };
+        await instituicaoService.editarAluno(idInstituicao, id, dataAluno, token);
+        alert('Aluno editado com sucesso!');
         navigate('/home-instituicao');
-      } catch (error) {
-        console.error('Erro ao cadastrar aluno:', error.response || error);
-        alert('Erro ao cadastrar aluno: ' + JSON.stringify(error.response?.data || error));
-      }
-      return;
-    }
-
-    if (tipoUsuario === 'PROFESSOR') {
-      if (!form.formacao || !form.area_atuacao || !form.dt_admissao) {
-        alert('Preencha Formação, Área de Atuação e Data de Admissão.');
-        return;
-      }
-      if (!form.turno) {
-        alert('Selecione um turno para o professor.');
-        return;
-      }
-
-      const dataProfessor = {
-        nome: form.nome,
-        email: form.email,
-        cpf: form.cpf,
-        dt_nascimento: form.dt_nascimento,
-        genero: form.genero,
-        telefone: form.telefone,
-        logradouro: form.endereco,
-        bairro: form.bairro,
-        numero: form.numero,
-        cidade: form.cidade,
-        senha: form.senha,
-        turno: form.turno,        
-        formacao: form.formacao,
-        diploma: form.diploma || 'nenhum arquivo selecionado',
-        dt_admissao: form.dt_admissao,
-        area_atuacao: form.area_atuacao,
-      };
-
-      try {
-        await instituicaoService.cadastrarProfessor(idInstituicao, dataProfessor, token);
-        alert('Professor cadastrado com sucesso!');
+      } else if (tipo === 'PROFESSOR') {
+        const dataProfessor = {
+          ...form,
+          logradouro: form.endereco,
+          formacao: form.formacao,
+          diploma: form.diploma || nomeArquivo,
+          turno: form.turno,
+        };
+        await instituicaoService.editarProfessor(idInstituicao, id, dataProfessor, token);
+        alert('Professor editado com sucesso!');
         navigate('/home-instituicao');
-      } catch (error) {
-        console.error('Erro ao cadastrar professor:', error.response || error);
-        alert('Erro ao cadastrar professor: ' + JSON.stringify(error.response?.data || error));
       }
-      return;
+    } catch (error) {
+      alert('Erro ao editar usuário: ' + JSON.stringify(error.response?.data || error));
     }
-
-    alert('Selecione um tipo de usuário (Aluno ou Professor).');
   };
 
+  // ------------------- RENDER ----------------------
   return (
     <Fundo>
       <div style={styles.wrapper}>
         <div style={styles.container}>
-          <h2 style={styles.titulo}>Cadastro de Usuário</h2>
+          <h2 style={styles.titulo}>Edição de Usuário</h2>
           <form style={styles.formulario} onSubmit={handleSubmit}>
             {/* ========== LINHA 1 ========== */}
             <input
               name="nome"
-              style={styles.input}
+              style={{ ...styles.input, backgroundColor: '#f0f0f0', cursor: 'not-allowed' }}
               placeholder="Nome"
               value={form.nome}
-              onChange={handleChange}
+              disabled
+              readOnly
             />
             <input
               name="email"
@@ -296,13 +232,13 @@ export default function CadastroUsuario() {
             />
             <input
               name="cpf"
-              style={styles.input}
+              style={{ ...styles.input, backgroundColor: '#f0f0f0', cursor: 'not-allowed' }}
               placeholder="CPF"
               value={form.cpf}
               maxLength={14}
-              onChange={handleCPF}
+              disabled
+              readOnly
             />
-
             {/* ========== LINHA 2 ========== */}
             <input
               name="dt_nascimento"
@@ -313,8 +249,9 @@ export default function CadastroUsuario() {
               onBlur={(e) => {
                 if (!e.target.value) e.target.type = 'text';
               }}
-              onChange={handleChange}
-              style={styles.input}
+              style={{ ...styles.input, backgroundColor: '#f0f0f0', cursor: 'not-allowed' }}
+              disabled
+              readOnly
             />
             <select
               name="genero"
@@ -335,7 +272,6 @@ export default function CadastroUsuario() {
               maxLength={15}
               onChange={handleTelefone}
             />
-
             <input
               name="endereco"
               style={styles.input}
@@ -343,7 +279,6 @@ export default function CadastroUsuario() {
               value={form.endereco}
               onChange={handleChange}
             />
-
             {/* ========== LINHA 3 ========== */}
             <input
               name="bairro"
@@ -370,24 +305,13 @@ export default function CadastroUsuario() {
               name="senha"
               type="password"
               style={styles.input}
-              placeholder="Senha Padrão"
+              placeholder="Senha"
               value={form.senha}
               onChange={handleChange}
             />
 
-            {/* ========== LINHA 4 ========== */}
-            <select
-              name="tipoUsuario"
-              style={styles.input}
-              value={tipoUsuario}
-              onChange={handleTipoUsuario}
-            >
-              <option value="">Tipo Usuário</option>
-              <option value="ALUNO">Aluno</option>
-              <option value="PROFESSOR">Professor</option>
-            </select>
-
-            {tipoUsuario === 'ALUNO' && (
+            {/* ========== CAMPOS PARA ALUNO ========== */}
+            {tipo === 'ALUNO' && (
               <>
                 <input
                   name="dt_inicio"
@@ -401,7 +325,6 @@ export default function CadastroUsuario() {
                   onChange={handleChange}
                   style={styles.input}
                 />
-
                 <select
                   name="id_curso"
                   style={styles.input}
@@ -415,7 +338,6 @@ export default function CadastroUsuario() {
                     </option>
                   ))}
                 </select>
-
                 <select
                   name="id_turma"
                   style={styles.input}
@@ -430,7 +352,6 @@ export default function CadastroUsuario() {
                     </option>
                   ))}
                 </select>
-
                 <input
                   name="turno"
                   style={{ ...styles.input, backgroundColor: '#f0f0f0', cursor: 'not-allowed' }}
@@ -441,9 +362,9 @@ export default function CadastroUsuario() {
               </>
             )}
 
-            {tipoUsuario === 'PROFESSOR' && (
+            {/* ========== CAMPOS PARA PROFESSOR ========== */}
+            {tipo === 'PROFESSOR' && (
               <>
-                {/* Turno do professor */}
                 <select
                   name="turno"
                   style={styles.input}
@@ -456,7 +377,6 @@ export default function CadastroUsuario() {
                   <option value="NOITE">Noite</option>
                   <option value="INTEGRAL">Integral</option>
                 </select>
-
                 <div style={styles.grid3}>
                   <select
                     name="formacao"
@@ -491,7 +411,6 @@ export default function CadastroUsuario() {
                     style={styles.input}
                   />
                 </div>
-
                 <div style={styles.fullWidth}>
                   <input
                     id="diploma"
@@ -525,6 +444,7 @@ export default function CadastroUsuario() {
               </>
             )}
 
+            {/* ========== BOTÕES ========== */}
             <div style={styles.botoesContainer}>
               <button
                 type="button"
@@ -534,7 +454,7 @@ export default function CadastroUsuario() {
                 Cancelar
               </button>
               <button type="submit" style={styles.botaoCadastrar}>
-                Cadastrar
+                Editar
               </button>
             </div>
           </form>

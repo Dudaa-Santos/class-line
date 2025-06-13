@@ -1,13 +1,19 @@
 import React, { useState } from 'react';
 import logo from '../../img/logo/logo2.png'; 
 import ilustracao from '../../img/IMG_LOGIN.png'; 
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { FiEye, FiEyeOff } from 'react-icons/fi';
+import { Oval } from 'react-loader-spinner';
+
+import professorService from '../../services/professorService';
 
 export default function LoginProfessor() {
   const [login, setLogin] = useState('');
   const [senha, setSenha] = useState('');
   const [mostrarSenha, setMostrarSenha] = useState(false);
+  const [erro, setErro] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
 
   function mascaraCPF(value) {
     value = value.replace(/\D/g, '');
@@ -17,10 +23,27 @@ export default function LoginProfessor() {
     return value;
   }
 
-  const handleLogin = (e) => {
-    e.preventDefault();
-    console.log('Login:', login, 'Senha:', senha);
-  };
+const handleLogin = async (e) => {
+  e.preventDefault();
+  setErro('');
+  setIsLoading(true);
+  try {
+    console.log("Enviando para a API:", { cpf: login, senha: senha });
+
+    const dados = await professorService.loginProfessor(login, senha);
+    console.log(erro)
+    localStorage.setItem('id_professor', dados.id);
+    if (dados.token) {
+      localStorage.setItem('token', dados.token);
+    }
+    navigate('/home-professor');
+  } catch (err) {
+    setErro('Login ou senha inválidos.');
+  } finally {
+    setIsLoading(false);
+  }
+};
+
 
   return (
     <div style={styles.page}>
@@ -67,7 +90,24 @@ export default function LoginProfessor() {
                 )}
               </button>
             </div>
-            <button type="submit" style={styles.button}>Acessar</button>
+              <button type="submit" style={styles.button} disabled={isLoading}>
+              {isLoading ? (
+                <>
+                  <Oval
+                    height={20}
+                    width={20}
+                    color="#fff"
+                    secondaryColor="#34a853"
+                    strokeWidth={4}
+                    strokeWidthSecondary={4}
+                    ariaLabel="carregando"
+                    wrapperStyle={{ display: 'inline-block', marginRight: 7, verticalAlign: 'middle' }}
+                  />
+                </>
+              ) : (
+                "Acessar"
+              )}
+            </button>
             </form>
         </div>
         <p style={styles.linkInstituicao}>
@@ -84,135 +124,137 @@ export default function LoginProfessor() {
 }
 
 const styles = {
-    page: {
-        width: '100vw',
-        height: '100vh',
-        background: 'linear-gradient(135deg, #01634D 0%, #016161 22%, #005E76 64%, #002B65 89%)',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        fontFamily: "'Lexend', sans-serif",
-    },
-    container: {
-        width: '87%',
-        height: '79%',
-        maxWidth: '1112px',
-        maxHeight: '660px',
-        backgroundColor: '#fff',
-        borderRadius: '20px',
-        display: 'flex',
-        boxShadow: '0 0 30px rgba(0, 0, 0, 0.15)',
-        overflow: 'hidden',
-    },
-    left: {
-      flex: 1,
-      backgroundColor: 'rgba(1, 99, 77, 0.15)',
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    leftImg: {
-      width: '80%',
-      maxWidth: '400px',
-    },
-    right: {
-      flex: 1,
-      padding: '60px 40px 40px 40px',     
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'flex-start',
-      gap: '20px',
-    },
-    logo: {
-      width: '300px',
-      marginBottom: '10px',
-    },
-    heading: {
-      color: '#002551',
-      marginBottom: '5px',
-      fontSize: '20px',
-      fontWeight: '600',
-    },
-    headingProf: {
-      color: '#002551',
-      marginBottom: '5px',
-      fontSize: '20px',
-      fontWeight: '600',
-      textAlign: 'center',
-      width: '100%',
-    },
-    form: {
-      width: '100%',
-      maxWidth: '300px',
-      display: 'flex',
-      flexDirection: 'column',
-      gap: '12px',
-    },
-    input: {
-      padding: '10px 15px',
-      borderRadius: '5px',
-      border: '1px solid #ccc',
-      fontSize: '16px',
-    },
-    button: {
-       backgroundColor: '#34a853',
-        color: '#fff',
-        border: 'none',
-        borderRadius: '5px',
-        padding: '10px 20px', 
-        fontSize: '16px',
-        cursor: 'pointer',
-        width: '150px', 
-        alignSelf: 'center', 
-        alignItems: 'center',
-    },
-    linkInstituicao: {
-      marginTop: '10px',
-      fontWeight: 'Light',
-      textAlign: 'center',
-      color: '#002551',
-    },
-    linkSpan: {
-      color: '#34a853',
-      fontWeight: 'Light',
-      cursor: 'pointer',
-    },
-    contentBox: {
-        width: '100%',
-        maxWidth: '300px',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'flex-start', 
-        gap: '10px',
-    },
-    senhaContainer: {
-      position: 'relative',
-      width: '100%',
-      maxWidth: '300px', 
-    },
-    senhaInput: {
-      padding: '10px 44px 10px 15px', 
-      borderRadius: '5px',
-      border: '1px solid #ccc',
-      fontSize: '16px',
-      width: '100%',
-      boxSizing: 'border-box',
-    },
-    olhinhoButton: {
-      position: "absolute",
-      right: "12px",
-      top: "50%",
-      transform: "translateY(-50%)",
-      background: "none",
-      border: "none",
-      cursor: "pointer",
-      padding: 0,
-      display: "flex",
-      alignItems: "center",
-      zIndex: 2
-    },
-
-
-  };
-
+  page: {
+    width: '100vw',
+    height: '100vh',
+    background: 'linear-gradient(135deg, #01634D 0%, #016161 22%, #005E76 64%, #002B65 89%)',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    fontFamily: "'Lexend', sans-serif",
+  },
+  container: {
+    width: '87%',
+    height: '79%',
+    maxWidth: '1112px',
+    maxHeight: '660px',
+    backgroundColor: '#fff',
+    borderRadius: '20px',
+    display: 'flex',
+    boxShadow: '0 0 30px rgba(0, 0, 0, 0.15)',
+    overflow: 'hidden',
+  },
+  left: {
+    flex: 1,
+    backgroundColor: 'rgba(1, 99, 77, 0.15)',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  leftImg: {
+    width: '80%',
+    maxWidth: '400px',
+  },
+  right: {
+    flex: 1,
+    padding: '60px 40px 40px 40px',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+    gap: '20px',
+  },
+  logo: {
+    width: '300px',
+    marginBottom: '10px',
+  },
+  heading: {
+    color: '#002551',
+    marginBottom: '5px',
+    fontSize: '20px',
+    fontWeight: '600',
+  },
+  headingProf: {
+    color: '#002551',
+    marginBottom: '5px',
+    fontSize: '20px',
+    fontWeight: '600',
+    textAlign: 'center',
+    width: '100%',
+  },
+  form: {
+    width: '100%',
+    maxWidth: '300px',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '12px',
+  },
+  input: {
+    padding: '10px 15px',
+    borderRadius: '5px',
+    border: '1px solid #ccc',
+    fontSize: '16px',
+  },
+  button: {
+    backgroundColor: '#34a853',
+    color: '#fff',
+    border: 'none',
+    borderRadius: '5px',
+    padding: '10px 20px',
+    fontSize: '16px',
+    cursor: 'pointer',
+    width: '150px',
+    alignSelf: 'center',
+    alignItems: 'center',
+    display: 'flex',
+    justifyContent: 'center',
+    gap: '8px',
+    opacity: 1,
+    transition: 'opacity 0.2s',
+  },
+  linkInstituicao: {
+    marginTop: '10px',
+    fontWeight: 'Light',
+    textAlign: 'center',
+    color: '#002551',
+  },
+  linkSpan: {
+    color: '#34a853',
+    fontWeight: 'Light',
+    cursor: 'pointer',
+  },
+  contentBox: {
+    width: '100%',
+    maxWidth: '300px',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+    gap: '10px',
+  },
+  senhaContainer: {
+    position: 'relative',
+    width: '100%',
+    maxWidth: '300px',
+  },
+  senhaInput: {
+    padding: '10px 44px 10px 15px',
+    borderRadius: '5px',
+    border: '1px solid #ccc',
+    fontSize: '16px',
+    width: '100%',
+    boxSizing: 'border-box',
+  },
+  olhinhoButton: {
+    position: "absolute",
+    right: "12px",
+    top: "50%",
+    transform: "translateY(-50%)",
+    background: "none",
+    border: "none",
+    cursor: "pointer",
+    padding: 0,
+    display: "flex",
+    alignItems: "center",
+    zIndex: 2
+  },
+};

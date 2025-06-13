@@ -3,32 +3,33 @@ import logo from '../../img/logo/logo2.png';
 import ilustracao from '../../img/IMG_LOGIN.png'; 
 import { Link, useNavigate } from "react-router-dom";
 import { FiEye, FiEyeOff } from 'react-icons/fi';
+import { Oval } from 'react-loader-spinner';
 
-import usuarioService from '../../services/instituicaoService';
+import instituicaoService from '../../services/instituicaoService';
 
 export default function LoginInstituicao() {
   const [login, setLogin] = useState('');
   const [senha, setSenha] = useState('');
   const [mostrarSenha, setMostrarSenha] = useState(false);
   const [erro, setErro] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
-
+    setErro('');
+    setIsLoading(true);
     try {
-      const dados = await usuarioService.loginInstituicao(login, senha);
-      console.log('Login bem-sucedido:', dados);
-
+      const dados = await instituicaoService.loginInstituicao(login, senha);
       localStorage.setItem('id_instituicao', dados.id);
       if (dados.token) {
         localStorage.setItem('token', dados.token);
       }
-
       navigate('/home-instituicao');
     } catch (err) {
-      console.error('Erro ao fazer login:', err);
       setErro('Login ou senha inválidos.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -52,6 +53,7 @@ export default function LoginInstituicao() {
                 value={login}
                 onChange={(e) => setLogin(e.target.value)}
                 style={styles.input}
+                autoComplete="username"
               />
               <div style={styles.senhaContainer}>
                 <input
@@ -60,6 +62,7 @@ export default function LoginInstituicao() {
                   value={senha}
                   onChange={(e) => setSenha(e.target.value)}
                   style={styles.senhaInput}
+                  autoComplete="current-password"
                 />
                 <button
                   type="button"
@@ -76,12 +79,29 @@ export default function LoginInstituicao() {
                 </button>
               </div>
 
-              <button type="submit" style={styles.button}>Acessar</button>
-              <div style={{ height: '20px', marginTop: '10px', textAlign: 'center', width: '100%' }}>
-              {erro && (
-                <p style={{ color: 'red', fontSize: '14px', margin: 0 }}>{erro}</p>
+              <button type="submit" style={styles.button} disabled={isLoading}>
+              {isLoading ? (
+                <>
+                  <Oval
+                    height={20}
+                    width={20}
+                    color="#fff"
+                    secondaryColor="#34a853"
+                    strokeWidth={4}
+                    strokeWidthSecondary={4}
+                    ariaLabel="carregando"
+                    wrapperStyle={{ display: 'inline-block', marginRight: 7, verticalAlign: 'middle' }}
+                  />
+                </>
+              ) : (
+                "Acessar"
               )}
-            </div>
+            </button>
+              <div style={{ height: '20px', marginTop: '10px', textAlign: 'center', width: '100%' }}>
+                {erro && (
+                  <p style={{ color: 'red', fontSize: '14px', margin: 0 }}>{erro}</p>
+                )}
+              </div>
             </form>
           </div>
 
@@ -182,6 +202,22 @@ const styles = {
     width: '150px',
     alignSelf: 'center',
     alignItems: 'center',
+    display: 'flex',
+    justifyContent: 'center',
+    gap: '8px',
+    opacity: 1,
+    transition: 'opacity 0.2s',
+  },
+  spinner: {
+    width: '20px',
+    height: '20px',
+    border: '3px solid rgba(52,168,83,0.15)', 
+    borderTop: '3px solid #34a853',           
+    borderRadius: '50%',
+    animation: 'spin 0.8s linear infinite',
+    marginRight: '7px',
+    display: 'inline-block',
+    verticalAlign: 'middle',
   },
   linkProfessor: {
     marginTop: '10px',

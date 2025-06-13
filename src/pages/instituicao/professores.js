@@ -36,7 +36,7 @@ function Professores() {
 
         {mostrarFiltro && (
           <div style={styles.filtroOverlay}>
-            <div style={{ padding: '10px', background: '#eee' }}>Filtros (em breve)</div>
+            <div style={{ padding: '10px', background: '#d9d9d9' }}>Filtros (em breve)</div>
           </div>
         )}
 
@@ -49,6 +49,7 @@ function Professores() {
                   <th style={{ ...styles.th, width: '20%' }}>Email</th>
                   <th style={{ ...styles.th, width: '20%' }}>Área de Atuação</th>
                   <th style={{ ...styles.th, width: '20%' }}>Turno</th>
+                  <th style={{ ...styles.th, width: '20%' }}>Status</th>
                   <th style={{ ...styles.thAcoes, width: '20%' }}>Ações</th>
                 </tr>
               </thead>
@@ -59,20 +60,15 @@ function Professores() {
                     <td style={styles.td}>{prof.email}</td>
                     <td style={styles.td}>{prof.area_atuacao}</td>
                     <td style={styles.td}>{prof.turno}</td>
+                    <td style={styles.td}>{prof.status}</td>
                     <td style={styles.tdAcoes}>
-                      <div style={{ display: 'flex', justifyContent: 'center' }}>
-                        <FaEdit
-                          style={styles.editIcon}
-                          onClick={() =>
-                            navigate('/cadastro-usuarios', {
-                              state: {
-                                modo: 'edicao',
-                                professor: prof,
-                              },
-                            })
-                          }
-                        />
-                      </div>
+                    <div style={{ display: 'flex', justifyContent: 'center' }}>
+                      <FaEdit
+                        style={styles.editIcon}
+                        // onClick={() => navigate(`/edicao-usuario/professor/{id_professor}`)}
+                        title="Editar"
+                      />
+                    </div>
                     </td>
                   </tr>
                 ))}

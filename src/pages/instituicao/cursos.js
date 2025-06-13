@@ -1,43 +1,31 @@
 import React, { useEffect, useState } from 'react';
 import Fundo from '../../components/fundo-nav';
-import { FaFilter, FaCog } from 'react-icons/fa';
+import { FaFilter, FaEdit } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import instituicaoService from '../../services/instituicaoService';
 
-function Turmas() {
+function Cursos() {
   const [mostrarFiltro, setMostrarFiltro] = useState(false);
-  const [turmas, setTurmas] = useState([]);
+  const [cursos, setCursos] = useState([]);
   const navigate = useNavigate();
 
   useEffect(() => {
-    async function carregarTurmas() {
+    async function carregarCursos() {
       try {
         const idInstituicao = localStorage.getItem('id_instituicao');
         const token = localStorage.getItem('token');
         if (!idInstituicao) return;
 
-        // aqui buscamos todas as turmas da instituição
-        const turmasData = await instituicaoService.buscarTurmas(idInstituicao, token);
-        console.log("DADOS RECEBIDOS:", turmasData);
-
-        // Tenta extrair array, independente do formato da resposta
-        if (Array.isArray(turmasData)) {
-          setTurmas(turmasData);
-        } else if (turmasData && Array.isArray(turmasData.turmas)) {
-          setTurmas(turmasData.turmas);
-        } else if (turmasData && Array.isArray(turmasData.data)) {
-          setTurmas(turmasData.data);
-        } else {
-          setTurmas([]);
-        }
+        const cursosData = await instituicaoService.buscarCursos(idInstituicao, token);
+        setCursos(cursosData);
       } catch (error) {
-        console.error('Não foi possível carregar turmas:', error);
-        setTurmas([]);
-        alert('Não foi possível carregar turmas.');
+        console.error('Erro ao buscar cursos:', error);
+        setCursos([]);
+        alert('Erro ao buscar dados dos cursos.');
       }
     }
-    carregarTurmas();
-  }, []);  // array vazio = executa apenas uma vez, ao montar
+    carregarCursos();
+  }, []);
 
   return (
     <Fundo>
@@ -47,9 +35,9 @@ function Turmas() {
             style={styles.filterButton}
             onClick={() => setMostrarFiltro(!mostrarFiltro)}
           />
-          <h2 style={styles.titulo}>Turmas</h2>
+          <h2 style={styles.titulo}>Cursos</h2>
         </div>
-   
+
         {mostrarFiltro && (
           <div style={styles.filtroOverlay}>
             <div style={{ padding: '10px', background: '#d9d9d9' }}>Filtros (em breve)</div>
@@ -59,57 +47,46 @@ function Turmas() {
         <div style={styles.tabelaContainer}>
           <table style={styles.table}>
             <thead>
-              <tr>
-                <th style={styles.th}>Nome</th>
-                <th style={styles.th}>Observação</th>
-                <th style={styles.th}>Turno</th>
-                <th style={styles.th}>Data Início</th>
-                <th style={styles.th}>Data Fim</th>
-                <th style={styles.th}>Curso</th>
-                <th style={styles.th}>Status</th>
-                <th style={styles.thAcoes}>Ações</th>
-              </tr>
-            </thead>
-            <tbody>
-            {turmas.map((turma) => (
-              <tr key={turma.id}>
-                <td style={styles.td}>{turma.nome}</td>
-                <td style={styles.td}>{turma.observacao || '—'}</td>
-                <td style={styles.td}>{turma.turno}</td>
-                <td style={styles.td}>
-                  {turma.dt_inicio
-                    ? new Date(turma.dt_inicio).toLocaleDateString('pt-BR')
-                    : '—'}
-                </td>
-                <td style={styles.td}>
-                  {turma.dt_fim
-                    ? new Date(turma.dt_fim).toLocaleDateString('pt-BR')
-                    : '—'}
-                </td>
-                <td style={styles.td}>{turma.curso?.nome || '—'}</td>
-                <td style={styles.td}>
-                  {turma.ativo === true || turma.ativo === 't'
-                    ? 'Ativo'
-                    : 'Inativo'}
-                </td>
+            <tr>
+              <th style={styles.th}>Nome</th>
+              <th style={styles.th}>Descrição</th>
+              <th style={styles.th}>Qtde. Semestres</th>  
+              <th style={styles.th}>Tipo</th>             
+              <th style={styles.thAcoes}>Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            {cursos.map((curso) => (
+              <tr key={curso.id}>
+                <td style={styles.td}>{curso.nome}</td>
+                <td style={styles.td}>{curso.descricao}</td>
+                <td style={styles.td}>{curso.qtde_semestres ?? '-'}</td> 
+                <td style={styles.td}>{curso.tipo ?? '-'}</td>         
                 <td style={styles.tdAcoes}>
-                  <div style={styles.iconesAcoes}>
-                    <FaCog
-                      style={styles.cogIcon}
-                      onClick={() => navigate(`/grade-curricular/${turma.idTurma}`)}
+                  <div style={{ display: 'flex', justifyContent: 'center' }}>
+                    <FaEdit
+                      style={styles.editIcon}
+                      onClick={() =>
+                        navigate('/cadastro-curso', {
+                          state: {
+                            modo: 'edicao',
+                            curso,
+                          },
+                        })
+                      }
                     />
                   </div>
                 </td>
               </tr>
             ))}
-            {turmas.length === 0 && (
+            {cursos.length === 0 && (
               <tr>
-                <td colSpan={8} style={{ textAlign: 'center', color: '#999', padding: '24px 0' }}>
-                  Nenhuma turma cadastrada.
+                <td colSpan={7} style={{ textAlign: 'center', color: '#999', padding: '24px 0' }}>
+                  Nenhum curso cadastrado.
                 </td>
               </tr>
             )}
-          </tbody>
+          </tbody>'
           </table>
         </div>
 
@@ -124,7 +101,7 @@ function Turmas() {
   );
 }
 
-export default Turmas;
+export default Cursos;
 
 const styles = {
   wrapper: {
@@ -170,7 +147,7 @@ const styles = {
   th: {
     textAlign: 'left',
     backgroundColor: '#D9D9D9',
-    padding: '14px',
+    padding: '16px',
     fontWeight: 600,
     fontSize: '15px',
     color: '#222',
@@ -194,7 +171,7 @@ const styles = {
   thAcoes: {
     textAlign: 'center',
     backgroundColor: '#D9D9D9',
-    padding: '14px',
+    padding: '16px',
     fontWeight: 600,
     fontSize: '15px',
     color: '#222',
@@ -202,15 +179,10 @@ const styles = {
     top: 0,
     zIndex: 1,
   },
-  eyeIcon: {
-    color: '#27AE60',
-    fontSize: '18px',
+  editIcon: {
+    color: '#FFB703',
     cursor: 'pointer',
-  },
-  cogIcon: {
-    color: '#1F668E',
-    fontSize: '18px',
-    cursor: 'pointer',
+    fontSize: '16px',
   },
   botaoVoltar: {
     marginTop: '40px',
@@ -218,7 +190,7 @@ const styles = {
     color: '#fff',
     border: 'none',
     padding: '12px 40px',
-    borderRadius: '8px',
+    borderRadius: '6px',
     cursor: 'pointer',
     fontSize: '16px',
     display: 'block',
@@ -230,10 +202,5 @@ const styles = {
     top: '60px',
     left: '30px',
     zIndex: 10,
-  },
-  iconesAcoes: {
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
   },
 };
