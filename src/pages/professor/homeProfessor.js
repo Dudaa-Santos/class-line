@@ -64,7 +64,7 @@ function Home() {
                   </div>
                   <button
                     style={styles.botaoVerMais}
-                    onClick={() => navigate(`/disciplinas/${turma.id}`)} 
+                    onClick={() => navigate(`/disciplinas/${turma.idTurma}`)} 
                   >
                     Ver Mais
                   </button>

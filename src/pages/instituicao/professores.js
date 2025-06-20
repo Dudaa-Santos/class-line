@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import Fundo from '../../components/fundo-nav';
-import { FaFilter, FaEdit } from 'react-icons/fa';
+import { FaEdit } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import instituicaoService from '../../services/instituicaoService';
 
 function Professores() {
-  const [mostrarFiltro, setMostrarFiltro] = useState(false);
   const [professores, setProfessores] = useState([]);
   const navigate = useNavigate();
 
@@ -27,19 +26,8 @@ function Professores() {
     <Fundo>
       <div style={styles.wrapper}>
         <div style={styles.header}>
-          <FaFilter
-            style={styles.filterButton}
-            onClick={() => setMostrarFiltro(!mostrarFiltro)}
-          />
           <h2 style={styles.titulo}>Professores</h2>
         </div>
-
-        {mostrarFiltro && (
-          <div style={styles.filtroOverlay}>
-            <div style={{ padding: '10px', background: '#d9d9d9' }}>Filtros (em breve)</div>
-          </div>
-        )}
-
         <div style={styles.tabelaContainer}>
           <div style={styles.tabelaScroll}>
             <table style={styles.table}>
@@ -55,7 +43,7 @@ function Professores() {
               </thead>
               <tbody style={styles.tabelaScroll}>
                 {professores.map((prof) => (
-                  <tr key={prof.id}>
+                  <tr key={prof.idProfessor}>
                     <td style={styles.td}>{prof.nome}</td>
                     <td style={styles.td}>{prof.email}</td>
                     <td style={styles.td}>{prof.area_atuacao}</td>
@@ -65,7 +53,7 @@ function Professores() {
                     <div style={{ display: 'flex', justifyContent: 'center' }}>
                       <FaEdit
                         style={styles.editIcon}
-                        // onClick={() => navigate(`/edicao-usuario/professor/{id_professor}`)}
+                        onClick={() => navigate(`/edicao-usuario/professor/${prof.idProfessor}`)}
                         title="Editar"
                       />
                     </div>
@@ -191,11 +179,5 @@ const styles = {
     display: 'block',
     marginLeft: 'auto',
     marginRight: 'auto',
-  },
-  filtroOverlay: {
-    position: 'absolute',
-    top: '60px',
-    left: '30px',
-    zIndex: 10,
   },
 };

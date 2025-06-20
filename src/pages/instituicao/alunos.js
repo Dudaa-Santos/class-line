@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import Fundo from '../../components/fundo-nav';
-import { FaFilter, FaEdit } from 'react-icons/fa';
+import { FaEdit } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import instituicaoService from '../../services/instituicaoService';
 
 function Alunos() {
-  const [mostrarFiltro, setMostrarFiltro] = useState(false);
   const [alunos, setAlunos] = useState([]);
   const navigate = useNavigate();
 
@@ -31,6 +30,7 @@ function Alunos() {
           
           return {
             ...aluno,
+            id: aluno.id ?? aluno.id_aluno ?? aluno.idAluno,
             nomeCurso,
             nomeTurma
           };
@@ -52,18 +52,8 @@ function Alunos() {
     <Fundo>
       <div style={styles.wrapper}>
         <div style={styles.header}>
-          <FaFilter
-            style={styles.filterButton}
-            onClick={() => setMostrarFiltro(!mostrarFiltro)}
-          />
           <h2 style={styles.titulo}>Alunos</h2>
         </div>
-
-        {mostrarFiltro && (
-          <div style={styles.filtroOverlay}>
-            <div style={{ padding: '10px', background: '#d9d9d9' }}>Filtros (em breve)</div>
-          </div>
-        )}
 
         <div style={styles.tabelaContainer}>
           <table style={styles.table}>
@@ -80,7 +70,7 @@ function Alunos() {
             </thead>
             <tbody>
               {alunos.map((aluno) => (
-                <tr key={aluno.id}>
+                <tr key={aluno.idAluno}>
                   <td style={styles.td}>{aluno.nome}</td>
                   <td style={styles.td}>{aluno.nomeCurso}</td>
                   <td style={styles.td}>{aluno.nomeTurma}</td>
@@ -91,14 +81,7 @@ function Alunos() {
                     <div style={{ display: 'flex', justifyContent: 'center' }}>
                       <FaEdit
                         style={styles.editIcon}
-                        onClick={() =>
-                          navigate('/cadastro-usuario', {
-                            state: {
-                              modo: 'edicao',
-                              aluno,
-                            },
-                          })
-                        }
+                        onClick={() => navigate(`/edicao-usuario/aluno/${aluno.idAluno}`)}
                       />
                     </div>
                   </td>
@@ -142,11 +125,6 @@ const styles = {
     alignItems: 'center',
     marginBottom: '30px',
     position: 'relative',
-  },
-  filterButton: {
-    fontSize: '24px',
-    color: '#FD750D',
-    cursor: 'pointer',
   },
   titulo: {
     position: 'absolute',
@@ -221,11 +199,5 @@ const styles = {
     display: 'block',
     marginLeft: 'auto',
     marginRight: 'auto',
-  },
-  filtroOverlay: {
-    position: 'absolute',
-    top: '60px',
-    left: '30px',
-    zIndex: 10,
   },
 };

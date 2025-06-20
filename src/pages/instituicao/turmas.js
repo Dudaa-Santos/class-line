@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import Fundo from '../../components/fundo-nav';
-import { FaFilter, FaCog } from 'react-icons/fa';
+import { FaCog } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import instituicaoService from '../../services/instituicaoService';
 
 function Turmas() {
-  const [mostrarFiltro, setMostrarFiltro] = useState(false);
   const [turmas, setTurmas] = useState([]);
   const navigate = useNavigate();
 
@@ -43,19 +42,8 @@ function Turmas() {
     <Fundo>
       <div style={styles.wrapper}>
         <div style={styles.header}>
-          <FaFilter
-            style={styles.filterButton}
-            onClick={() => setMostrarFiltro(!mostrarFiltro)}
-          />
           <h2 style={styles.titulo}>Turmas</h2>
         </div>
-   
-        {mostrarFiltro && (
-          <div style={styles.filtroOverlay}>
-            <div style={{ padding: '10px', background: '#d9d9d9' }}>Filtros (em breve)</div>
-          </div>
-        )}
-
         <div style={styles.tabelaContainer}>
           <table style={styles.table}>
             <thead>
@@ -141,11 +129,6 @@ const styles = {
     marginBottom: '30px',
     position: 'relative',
   },
-  filterButton: {
-    fontSize: '24px',
-    color: '#FD750D',
-    cursor: 'pointer',
-  },
   titulo: {
     position: 'absolute',
     left: '50%',
@@ -224,12 +207,6 @@ const styles = {
     display: 'block',
     marginLeft: 'auto',
     marginRight: 'auto',
-  },
-  filtroOverlay: {
-    position: 'absolute',
-    top: '60px',
-    left: '30px',
-    zIndex: 10,
   },
   iconesAcoes: {
     display: 'flex',

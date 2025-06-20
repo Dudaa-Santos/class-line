@@ -31,7 +31,6 @@ const cadastrarProfessor = async (idInstituicao, data, token) => {
 
 const cadastrarCurso = async (idInstituicao, data, token) => {
   try {
-    console.log(idInstituicao, data, token);
     const response = await httpClient.post(
       `/curso/${idInstituicao}`,
       data,
@@ -48,7 +47,6 @@ const cadastrarCurso = async (idInstituicao, data, token) => {
 };
 
 const cadastrarDisciplina = async (idInstituicao, data, token) => {
-    console.log(idInstituicao, data, token);
   try {
   const response = await httpClient.post(
     `/disciplina/${idInstituicao}`,
@@ -67,8 +65,6 @@ const cadastrarDisciplina = async (idInstituicao, data, token) => {
 };
 
 const buscarCursos = async (idInstituicao, token) => {
-    console.log('ID Instituição:', idInstituicao);
-
   const response = await httpClient.get(
     `/curso/instituicao/${idInstituicao}`,
     { 
@@ -82,7 +78,6 @@ const buscarCursos = async (idInstituicao, token) => {
 };
 
 const cadastrarTurma = async (idCurso, data, token) => {
-  console.log(idCurso, data, token);
   const response = await httpClient.post(
     `/turma/${idCurso}`,
     data,
@@ -108,7 +103,6 @@ const buscarProfessores = async (idInstituicao, token) => {
 };
 
 const buscarTurmasPorCurso = async (idCurso, token) => {
-  console.log(idCurso)
   const response = await httpClient.get(
     `/turma/curso/${idCurso}`,
     { 
@@ -155,7 +149,6 @@ const buscarAluno = async (idInstituicao, token) => {
 };
 
 const buscarTurmas = async (idInstituicao, token) => {
-  console.log(idInstituicao)
   const response = await httpClient.get(
     `/turma/instituicao/${idInstituicao}`,
     { 
@@ -195,7 +188,6 @@ const buscarCursoPorId = async (idCurso, token) => {
 };
 
 const buscarDisciplina = async (idInstituicao, token) => {
-  console.log(idInstituicao)
   const response = await httpClient.get(
     `/disciplina/instituicao/${idInstituicao}`,
     { 
@@ -209,7 +201,6 @@ const buscarDisciplina = async (idInstituicao, token) => {
 };
 
 const buscarSemestres = async (idGrade, token) => {
-  console.log(idGrade)
   const response = await httpClient.get(
     `/semestre/${idGrade}`,
     { 
@@ -223,7 +214,6 @@ const buscarSemestres = async (idGrade, token) => {
 };
 
 const buscarDisciplinasSemestres = async (idTurma, token) => {
-  console.log(idTurma)
   const response = await httpClient.get(
     `/disciplinasemestre/turma/${idTurma}`,
     { 
@@ -237,21 +227,23 @@ const buscarDisciplinasSemestres = async (idTurma, token) => {
 };
 
 const cadastrarDisciplinaSemestre = async (idDisciplina, idSemestre, idProfessor, token) => {
-  console.log(idDisciplina, idSemestre, idProfessor, token);
-  const response = await httpClient.post(
-    `/disciplinasemestre/disciplina/${idDisciplina}/semestre/${idSemestre}/professor/${idProfessor}`,
-    {},
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
+  try {
+    const response = await httpClient.post(
+      `/disciplinasemestre/disciplina/${idDisciplina}/semestre/${idSemestre}/professor/${idProfessor}`,
+      {},
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        }
       }
-    }
-  );
-  return response.data;
+    );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
 };
 
 const deletarDisciplinaSemestre = async (idDisciplina, idSemestre, idProfessor, token) => {
-  console.log(idDisciplina, idSemestre, idProfessor, token);
   const response = await httpClient.delete(
     `/disciplinasemestre/disciplina/${idDisciplina}/semestre/${idSemestre}/professor/${idProfessor}/inativar`,
     {},
@@ -265,7 +257,6 @@ const deletarDisciplinaSemestre = async (idDisciplina, idSemestre, idProfessor, 
 };
 
 const editarDisciplinaSemestre = async (idDisciplina, idSemestre, idProfessor, token) => {
-  console.log(idDisciplina, idSemestre, idProfessor, token);
   const response = await httpClient.put(
     `/disciplinasemestre/disciplina/${idDisciplina}/semestre/${idSemestre}/professor/${idProfessor}/inativar`,
     {},
@@ -278,71 +269,71 @@ const editarDisciplinaSemestre = async (idDisciplina, idSemestre, idProfessor, t
   return response.data;
 };
 
-// const buscarAlunoPorId = async (idAluno, token) => {
-//   try {
-//     const response = await httpClient.get(
-//       `/aluno/${idAluno}`,
-//       {
-//         headers: {
-//           Authorization: `Bearer ${token}`,
-//         },
-//       }
-//     );
-//     return response.data;
-//   } catch (error) {
-//     throw error;
-//   }
-// };
+const buscarAlunoPorId = async (idAluno, token) => {
+  try {
+    const response = await httpClient.get(
+      `/aluno/${idAluno}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
 
-// const buscarProfessorPorId = async (idProfessor, token) => {
-//   try {
-//     const response = await httpClient.get(
-//       `/professor/${idProfessor}`,
-//       {
-//         headers: {
-//           Authorization: `Bearer ${token}`,
-//         },
-//       }
-//     );
-//     return response.data;
-//   } catch (error) {
-//     throw error;
-//   }
-// };
+const buscarProfessorPorId = async (idProfessor, token) => {
+  try {
+    const response = await httpClient.get(
+      `/professor/${idProfessor}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
 
-// const editarProfessor = async (idProfessor, idInstituicao, data, token) => {
-//   try {
-//     const response = await httpClient.put(
-//       `/professor/${idInstituicao}/${idProfessor}`,
-//       data,
-//       {
-//         headers: {
-//           Authorization: `Bearer ${token}`
-//         }
-//       }
-//     );
-//     return response.data;
-//   } catch (error) {
-//     throw error;
-//   }
-// };
+const editarProfessor = async (idProfessor, idInstituicao, data, token) => {
+  try {
+    const response = await httpClient.put(
+      `/professor/${idInstituicao}/${idProfessor}`,
+      data,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
 
-// const editarAluno = async (idAluno, data, token) => {
-//   try {
-//     const response = await httpClient.put(
-//       `/aluno/${idAluno}`,
-//       data,
-//       {
-//         headers: {
-//           Authorization: `Bearer ${token}`
-//         }
-//       }
-//     );
-//     return response.data;
-//   } catch (error) {
-//     throw error;
-//   }
-// };
+const editarAluno = async (idAluno, data, token) => {
+  try {
+    const response = await httpClient.put(
+      `/aluno/${idAluno}`,
+      data,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
 
 const instituicaoService = {
   loginInstituicao,
@@ -355,12 +346,12 @@ const instituicaoService = {
   buscarTurmasPorCurso,
   cadastrarAluno,
   buscarAluno,
-  // editarProfessor,
-  // editarAluno,
+  editarProfessor,
+  editarAluno,
   buscarTurmas,
   buscarTurmaPorId,
-  // buscarAlunoPorId,
-  // buscarProfessorPorId,
+  buscarAlunoPorId,
+  buscarProfessorPorId,
   cadastrarDisciplina,
   buscarDisciplina,
   buscarSemestres,

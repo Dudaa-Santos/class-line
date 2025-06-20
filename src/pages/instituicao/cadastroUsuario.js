@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import Fundo from '../../components/fundo-nav';
 import { useNavigate } from 'react-router-dom';
+import { FiEye, FiEyeOff } from 'react-icons/fi';
 import Upload from '../../img/sem-preenchimento/upload-icon.png';
 import instituicaoService from '../../services/instituicaoService';
 
@@ -23,6 +24,7 @@ function maskTelefone(value) {
 export default function CadastroUsuario() {
   const [tipoUsuario, setTipoUsuario] = useState('');
   const [nomeArquivo, setNomeArquivo] = useState('');
+  const [mostrarSenha, setMostrarSenha] = useState(false); 
   const [cursos, setCursos] = useState([]);
   const [turmas, setTurmas] = useState([]);
   const [form, setForm] = useState({
@@ -48,7 +50,7 @@ export default function CadastroUsuario() {
   });
   const navigate = useNavigate();
 
-  // carrega cursos 
+  // Carrega cursos 
   useEffect(() => {
     const token = localStorage.getItem('token');
     async function carregarCursos() {
@@ -66,7 +68,7 @@ export default function CadastroUsuario() {
     carregarCursos();
   }, []);
 
-  // carrega turmas sempre que id_curso mudar
+  // Carrega turmas quando o curso é selecionado
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (!form.id_curso) {
@@ -90,7 +92,7 @@ export default function CadastroUsuario() {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    // atualiza o turno com o da turma escolhida
+    
     if (name === 'id_turma') {
       const turmaSelecionada = turmas.find((t) => String(t.idTurma) === value);
       const turnoDaTurma = turmaSelecionada ? turmaSelecionada.turno : '';
@@ -113,25 +115,9 @@ export default function CadastroUsuario() {
     }));
   };
 
-  const handleCPF = (e) => {
-    const { name, value } = e.target;
-    setForm((prev) => ({
-      ...prev,
-      [name]: name === 'cpf' ? maskCPF(value) : value,
-    }));
-  };
-
-  const handleTelefone = (e) => {
-    const { name, value } = e.target;
-    setForm((prev) => ({
-      ...prev,
-      [name]: name === 'telefone' ? maskTelefone(value) : value,
-    }));
-  };
-
   const handleTipoUsuario = (e) => {
     setTipoUsuario(e.target.value);
-    // limpar campos específicos ao trocar tipo
+    // Limpa campos específicos ao trocar tipo
     setForm((prev) => ({
       ...prev,
       turno: '',
@@ -177,26 +163,15 @@ export default function CadastroUsuario() {
       return;
     }
 
+    // Validação básica
     if (!form.nome || !form.email || !form.cpf) {
       alert('Preencha pelo menos Nome, Email e CPF.');
       return;
     }
 
     if (tipoUsuario === 'ALUNO') {
-      if (!form.id_curso) {
-        alert('Selecione um curso.');
-        return;
-      }
-      if (!form.id_turma) {
-        alert('Selecione uma turma.');
-        return;
-      }
-      if (!form.dt_inicio) {
-        alert('Informe a data de matrícula.');
-        return;
-      }
-      if (!form.turno) {
-        alert('O turno da turma não foi carregado corretamente.');
+      if (!form.id_curso || !form.id_turma || !form.dt_inicio || !form.turno) {
+        alert('Preencha todos os campos obrigatórios para aluno.');
         return;
       }
 
@@ -212,7 +187,7 @@ export default function CadastroUsuario() {
         numero: form.numero,
         cidade: form.cidade,
         senha: form.senha,
-        turno: form.turno,       // turno da turma
+        turno: form.turno,
         id_curso: form.id_curso,
         id_turma: form.id_turma,
         dt_inicio: form.dt_inicio,
@@ -223,19 +198,15 @@ export default function CadastroUsuario() {
         alert('Aluno cadastrado com sucesso!');
         navigate('/home-instituicao');
       } catch (error) {
-        console.error('Erro ao cadastrar aluno:', error.response || error);
-        alert('Erro ao cadastrar aluno: ' + JSON.stringify(error.response?.data || error));
+        console.error('Erro ao cadastrar aluno:', error);
+        alert('Erro ao cadastrar aluno. Verifique os dados e tente novamente.');
       }
       return;
     }
 
     if (tipoUsuario === 'PROFESSOR') {
-      if (!form.formacao || !form.area_atuacao || !form.dt_admissao) {
-        alert('Preencha Formação, Área de Atuação e Data de Admissão.');
-        return;
-      }
-      if (!form.turno) {
-        alert('Selecione um turno para o professor.');
+      if (!form.formacao || !form.area_atuacao || !form.dt_admissao || !form.turno) {
+        alert('Preencha todos os campos obrigatórios para professor.');
         return;
       }
 
@@ -251,7 +222,7 @@ export default function CadastroUsuario() {
         numero: form.numero,
         cidade: form.cidade,
         senha: form.senha,
-        turno: form.turno,        
+        turno: form.turno,
         formacao: form.formacao,
         diploma: form.diploma || 'nenhum arquivo selecionado',
         dt_admissao: form.dt_admissao,
@@ -263,8 +234,8 @@ export default function CadastroUsuario() {
         alert('Professor cadastrado com sucesso!');
         navigate('/home-instituicao');
       } catch (error) {
-        console.error('Erro ao cadastrar professor:', error.response || error);
-        alert('Erro ao cadastrar professor: ' + JSON.stringify(error.response?.data || error));
+        console.error('Erro ao cadastrar professor:', error);
+        alert('Erro ao cadastrar professor. Verifique os dados e tente novamente.');
       }
       return;
     }
@@ -278,13 +249,14 @@ export default function CadastroUsuario() {
         <div style={styles.container}>
           <h2 style={styles.titulo}>Cadastro de Usuário</h2>
           <form style={styles.formulario} onSubmit={handleSubmit}>
-            {/* ========== LINHA 1 ========== */}
+            {/* Dados básicos */}
             <input
               name="nome"
               style={styles.input}
               placeholder="Nome"
               value={form.nome}
               onChange={handleChange}
+              required
             />
             <input
               name="email"
@@ -293,6 +265,7 @@ export default function CadastroUsuario() {
               placeholder="E-mail"
               value={form.email}
               onChange={handleChange}
+              required
             />
             <input
               name="cpf"
@@ -300,10 +273,10 @@ export default function CadastroUsuario() {
               placeholder="CPF"
               value={form.cpf}
               maxLength={14}
-              onChange={handleCPF}
+              onChange={handleChange}
+              required
             />
 
-            {/* ========== LINHA 2 ========== */}
             <input
               name="dt_nascimento"
               type="text"
@@ -333,7 +306,7 @@ export default function CadastroUsuario() {
               placeholder="Telefone"
               value={form.telefone}
               maxLength={15}
-              onChange={handleTelefone}
+              onChange={handleChange}
             />
 
             <input
@@ -343,8 +316,6 @@ export default function CadastroUsuario() {
               value={form.endereco}
               onChange={handleChange}
             />
-
-            {/* ========== LINHA 3 ========== */}
             <input
               name="bairro"
               style={styles.input}
@@ -366,21 +337,30 @@ export default function CadastroUsuario() {
               value={form.cidade}
               onChange={handleChange}
             />
-            <input
-              name="senha"
-              type="password"
-              style={styles.input}
-              placeholder="Senha Padrão"
-              value={form.senha}
-              onChange={handleChange}
-            />
-
-            {/* ========== LINHA 4 ========== */}
+            <div style={styles.senhaContainer}>
+              <input
+                name="senha"
+                type={mostrarSenha ? 'text' : 'password'}
+                style={styles.input}
+                placeholder="Senha Padrão"
+                value={form.senha}
+                onChange={handleChange}
+              />
+              <button
+                type="button"
+                onClick={() => setMostrarSenha((prev) => !prev)}
+                style={styles.olhinhoButton}
+                aria-label={mostrarSenha ? 'Ocultar senha' : 'Mostrar senha'}
+              >
+                {mostrarSenha ? <FiEyeOff size={20} color="#787878" /> : <FiEye size={20} color="#787878" />}
+              </button>
+            </div>
             <select
               name="tipoUsuario"
               style={styles.input}
               value={tipoUsuario}
               onChange={handleTipoUsuario}
+              required
             >
               <option value="">Tipo Usuário</option>
               <option value="ALUNO">Aluno</option>
@@ -400,6 +380,7 @@ export default function CadastroUsuario() {
                   }}
                   onChange={handleChange}
                   style={styles.input}
+                  required
                 />
 
                 <select
@@ -407,6 +388,7 @@ export default function CadastroUsuario() {
                   style={styles.input}
                   value={form.id_curso}
                   onChange={handleChange}
+                  required
                 >
                   <option value="">Selecione o Curso</option>
                   {cursos.map((curso) => (
@@ -422,6 +404,7 @@ export default function CadastroUsuario() {
                   value={form.id_turma}
                   onChange={handleChange}
                   disabled={!form.id_curso}
+                  required
                 >
                   <option value="">Selecione a Turma</option>
                   {turmas.map((turma) => (
@@ -443,12 +426,12 @@ export default function CadastroUsuario() {
 
             {tipoUsuario === 'PROFESSOR' && (
               <>
-                {/* Turno do professor */}
                 <select
                   name="turno"
                   style={styles.input}
                   value={form.turno}
                   onChange={handleChange}
+                  required
                 >
                   <option value="">Turno</option>
                   <option value="MANHA">Manhã</option>
@@ -463,6 +446,7 @@ export default function CadastroUsuario() {
                     style={styles.input}
                     value={form.formacao}
                     onChange={handleChange}
+                    required
                   >
                     <option value="">Formação</option>
                     <option value="TECNICO">Técnico</option>
@@ -477,6 +461,7 @@ export default function CadastroUsuario() {
                     placeholder="Área de Atuação"
                     value={form.area_atuacao}
                     onChange={handleChange}
+                    required
                   />
                   <input
                     name="dt_admissao"
@@ -489,6 +474,7 @@ export default function CadastroUsuario() {
                     }}
                     onChange={handleChange}
                     style={styles.input}
+                    required
                   />
                 </div>
 
@@ -640,5 +626,18 @@ const styles = {
     userSelect: 'none',
     transition: 'background-color 0.2s ease',
     minWidth: 0,
+  },
+  senhaContainer: {
+    position: 'relative',
+    display: 'flex',
+    alignItems: 'center',
+  },
+  olhinhoButton: {
+    position: 'absolute',
+    right: '12px',
+    background: 'transparent',
+    border: 'none',
+    cursor: 'pointer',
+    padding: 0,
   },
 };

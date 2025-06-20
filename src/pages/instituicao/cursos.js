@@ -1,11 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import Fundo from '../../components/fundo-nav';
-import { FaFilter, FaEdit } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import instituicaoService from '../../services/instituicaoService';
 
 function Cursos() {
-  const [mostrarFiltro, setMostrarFiltro] = useState(false);
   const [cursos, setCursos] = useState([]);
   const navigate = useNavigate();
 
@@ -31,18 +29,8 @@ function Cursos() {
     <Fundo>
       <div style={styles.wrapper}>
         <div style={styles.header}>
-          <FaFilter
-            style={styles.filterButton}
-            onClick={() => setMostrarFiltro(!mostrarFiltro)}
-          />
           <h2 style={styles.titulo}>Cursos</h2>
         </div>
-
-        {mostrarFiltro && (
-          <div style={styles.filtroOverlay}>
-            <div style={{ padding: '10px', background: '#d9d9d9' }}>Filtros (em breve)</div>
-          </div>
-        )}
 
         <div style={styles.tabelaContainer}>
           <table style={styles.table}>
@@ -52,7 +40,6 @@ function Cursos() {
               <th style={styles.th}>Descrição</th>
               <th style={styles.th}>Qtde. Semestres</th>  
               <th style={styles.th}>Tipo</th>             
-              <th style={styles.thAcoes}>Ações</th>
             </tr>
           </thead>
           <tbody>
@@ -62,21 +49,6 @@ function Cursos() {
                 <td style={styles.td}>{curso.descricao}</td>
                 <td style={styles.td}>{curso.qtde_semestres ?? '-'}</td> 
                 <td style={styles.td}>{curso.tipo ?? '-'}</td>         
-                <td style={styles.tdAcoes}>
-                  <div style={{ display: 'flex', justifyContent: 'center' }}>
-                    <FaEdit
-                      style={styles.editIcon}
-                      onClick={() =>
-                        navigate('/cadastro-curso', {
-                          state: {
-                            modo: 'edicao',
-                            curso,
-                          },
-                        })
-                      }
-                    />
-                  </div>
-                </td>
               </tr>
             ))}
             {cursos.length === 0 && (
@@ -86,7 +58,7 @@ function Cursos() {
                 </td>
               </tr>
             )}
-          </tbody>'
+          </tbody>
           </table>
         </div>
 
@@ -118,11 +90,6 @@ const styles = {
     marginBottom: '30px',
     position: 'relative',
   },
-  filterButton: {
-    fontSize: '24px',
-    color: '#FD750D',
-    cursor: 'pointer',
-  },
   titulo: {
     position: 'absolute',
     left: '50%',
@@ -132,6 +99,8 @@ const styles = {
     color: '#002B65',
   },
   tabelaContainer: {
+    width: '80%',
+    margin: '0 auto',
     maxHeight: '60vh',
     overflowY: 'auto',
     overflowX: 'hidden',
@@ -161,29 +130,6 @@ const styles = {
     color: '#333',
     borderTop: '1px solid #eee',
   },
-  tdAcoes: {
-    padding: '14px 16px',
-    fontSize: '14px',
-    color: '#333',
-    borderTop: '1px solid #eee',
-    textAlign: 'center',
-  },
-  thAcoes: {
-    textAlign: 'center',
-    backgroundColor: '#D9D9D9',
-    padding: '16px',
-    fontWeight: 600,
-    fontSize: '15px',
-    color: '#222',
-    position: 'sticky',
-    top: 0,
-    zIndex: 1,
-  },
-  editIcon: {
-    color: '#FFB703',
-    cursor: 'pointer',
-    fontSize: '16px',
-  },
   botaoVoltar: {
     marginTop: '40px',
     backgroundColor: '#FD750D',
@@ -196,11 +142,5 @@ const styles = {
     display: 'block',
     marginLeft: 'auto',
     marginRight: 'auto',
-  },
-  filtroOverlay: {
-    position: 'absolute',
-    top: '60px',
-    left: '30px',
-    zIndex: 10,
   },
 };

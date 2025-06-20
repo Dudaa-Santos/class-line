@@ -1,24 +1,38 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Fundo from '../../components/fundo-nav';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import instituicaoService from '../../services/instituicaoService';
 
-export default function CadastroCurso() {
+export default function EdicaoDisciplina() {
   const [form, setForm] = useState({
-    nome: '',
-    descricao: '',
-    qtde_semestres: '',
-    tipo: '',
+    carga_horaria: '',
+    idProfessor: '',
   });
+  const [professores, setProfessores] = useState([]);
   const navigate = useNavigate();
+  const { idTurma, idDisciplina, idSemestre } = useParams();
 
-  const handleCancelar = () => {
-    navigate('/home-instituicao');
-  };
+  useEffect(() => {
+    async function carregarDados() {
+      const token = localStorage.getItem('token');
+      const idInstituicao = localStorage.getItem('id_instituicao');
+      try {
+        const lista = await instituicaoService.buscarProfessores(idInstituicao, token);
+        const professoresNormalizados = lista.map(p => ({
+          id: p.idProfessor ?? p.id,
+          nome: p.nome,
+        }));
+        setProfessores(professoresNormalizados);
+      } catch (err) {
+        alert("Erro ao carregar professores.");
+      }
+    }
+    carregarDados();
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setForm((prev) => ({
+    setForm(prev => ({
       ...prev,
       [name]: value,
     }));
@@ -26,38 +40,30 @@ export default function CadastroCurso() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    const idInstituicao = localStorage.getItem('id_instituicao');
-    // const idInstituicao = usuario ? JSON.parse(usuario).id : null;
     const token = localStorage.getItem('token');
 
-    if (!idInstituicao || !token) {
-      alert('Instituição ou token não encontrado!');
-      return;
-    }
-
-    const data = {
-      nome: form.nome,
-      descricao: form.descricao,
-      qtde_semestres: Number(form.qtde_semestres),
-      tipo: form.tipo,
-    };
-
     try {
-      const response = await instituicaoService.cadastrarCurso(idInstituicao, data, token)
-      console.log(response);
-      alert('Curso cadastrado com sucesso!');
-      navigate('/home-instituicao');
+      await instituicaoService.editarDisciplinaSemestre(
+        idDisciplina,
+        idSemestre,
+        idTurma,
+        {
+          carga_horaria: Number(form.carga_horaria),
+          idProfessor: Number(form.idProfessor),
+        },
+        token
+      );
+      alert('Disciplina editada com sucesso!');
+      navigate(`/gerenciar-grades/${idTurma}`);
     } catch (error) {
-      console.error("Erro ao cadastrar curso:", error);
-      const mensagemErro =
-        error?.response?.data?.message || 
-        error?.message ||                 
-        'Erro desconhecido';             
+      const msg =
+        error?.response?.data?.message || error?.message || 'Erro desconhecido';
+      alert('Erro ao editar disciplina: ' + msg);
+    }
+  };
 
-      alert('Erro ao cadastrar curso: ' + mensagemErro);
-}
-
+  const handleCancelar = () => {
+    navigate(`/gerenciar-grades/${idTurma}`);
   };
 
   return (
@@ -65,66 +71,39 @@ export default function CadastroCurso() {
       <div style={styles.wrapper}>
         <div style={styles.container}>
           <div style={styles.tituloContainer}>
-            <h2 style={styles.titulo}>Cadastro de Curso</h2>
+            <h2 style={styles.titulo}>Edição de Disciplina</h2>
           </div>
-
           <form style={styles.formulario} onSubmit={handleSubmit}>
-            {/* Linha 1 - Nome e Descrição */}
             <input
-              name="nome"
+              name="carga_horaria"
+              type="number"
+              min="1"
               style={{ ...styles.input, gridColumn: 'span 2' }}
-              placeholder="Nome do Curso"
-              value={form.nome}
-              onChange={handleChange}
-              required
-            />
-            <input
-              name="descricao"
-              style={{ ...styles.input, gridColumn: 'span 2' }}
-              placeholder="Descrição do Curso"
-              value={form.descricao}
+              placeholder="Carga Horária (em horas)"
+              value={form.carga_horaria}
               onChange={handleChange}
               required
             />
 
-            {/* Linha 2 - Tipo e Qtde Semestres */}
             <select
-              name="tipo"
-              style={styles.input}
-              value={form.tipo}
+              name="idProfessor"
+              style={{ ...styles.input, gridColumn: 'span 2' }}
+              value={form.idProfessor}
               onChange={handleChange}
               required
             >
-              <option value="">Tipo de Curso</option>
-              <option value="TECNICO">Técnico</option>
-              <option value="BACHARELADO">Bacharelado</option>
-              <option value="POSGRADUACAO">Pós-graduação</option>
-              <option value="MESTRADO">Mestrado</option>
-              <option value="DOUTORADO">Doutorado</option>
-              <option value="LICENCIATURA">Licenciatura</option>
-              <option value="EXTENSAO">Extensão</option>
-            </select>
-            
-            <select
-              name="qtde_semestres"
-              style={styles.input}
-              value={form.qtde_semestres}
-              onChange={handleChange}
-              required
-            >
-              <option value="">Qtd. de Semestres</option>
-              {[...Array(12)].map((_, i) => (
-                <option key={i + 1} value={i + 1}>{i + 1}</option>
+              <option value="">Selecione o Professor</option>
+              {professores.map((p) => (
+                <option key={p.id} value={p.id}>{p.nome}</option>
               ))}
             </select>
 
-            {/* Botões */}
             <div style={styles.botoesContainer}>
               <button type="button" style={styles.botaoCancelar} onClick={handleCancelar}>
                 Cancelar
               </button>
               <button type="submit" style={styles.botaoCadastrar}>
-                Cadastrar
+                Salvar
               </button>
             </div>
           </form>

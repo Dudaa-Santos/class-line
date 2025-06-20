@@ -8,12 +8,19 @@ import HomeInstituicao from "../pages/instituicao/homeInstituicao";
 import HomeProfessor from "../pages/professor/homeProfessor";
 
 import CadastroUsuario from "../pages/instituicao/cadastroUsuario";
-// import EdicaoUsuario from "../pages/instituicao/edicaoUsuario";
 import CadastroTurma from "../pages/instituicao/cadastroTurma";
 import CadastroCurso from "../pages/instituicao/cadastroCurso";
 import CadastroDiscplina from "../pages/instituicao/cadastroDisciplina";
 
+import EdicaoUsuario from "../pages/instituicao/edicaoUsuario";
+// import EdicaoDisciplina from "../pages/instituicao/edicaoDisciplina";
+
 import Disciplinas from "../pages/professor/disciplinas";
+import AlunosDisciplina from "../pages/professor/alunosDisciplina";
+import RegistrarPresenca from "../pages/professor/registrarPresenca";
+import ListaPresenca from "../pages/professor/listaPresenca";
+import InserirAvaliacao from "../pages/professor/inserirAvaliacao";
+import LancarNotas from "../pages/professor/lancarNotas";
 
 import GradeCurricular from "../pages/instituicao/gradeCurricular";
 import Alunos from "../pages/instituicao/alunos";
@@ -34,8 +41,7 @@ const Rotas = () => {
         <Route element={<PrivateRoute tipoPermitido="instituicao" />}>
           <Route path="/home-instituicao" element={<HomeInstituicao />} />
           <Route path="/cadastro-usuarios" element={<CadastroUsuario />} />
-          {/* <Route path="/edicao-usuario/professor/{id_professor}" element={<EdicaoUsuario />} />
-          <Route path="/edicao-usuario/aluno/{id_aluno}" element={<EdicaoUsuario />} /> */}
+          <Route path="/edicao-usuario/:tipo/:id" element={<EdicaoUsuario />} />
           <Route path="/cadastro-turma" element={<CadastroTurma />} />
           <Route path="/cadastro-curso" element={<CadastroCurso />} />
           <Route path="/cadastro-disciplina" element={<CadastroDiscplina />} />
@@ -49,6 +55,11 @@ const Rotas = () => {
         <Route element={<PrivateRoute tipoPermitido="professor" />}>
           <Route path="/home-professor" element={<HomeProfessor />} />
           <Route path="/disciplinas/:id" element={<Disciplinas />} />
+          <Route path="/aluno/disciplina/:idDisciplina" element={<AlunosDisciplina />} />
+          <Route path="/frequencia/turma/:idTurma/disciplina/:idDisciplina" element={<RegistrarPresenca />} />
+          <Route path="/professor/turmas/:idTurma/disciplinas/:idDisciplina/lista-presenca" element={<ListaPresenca />} />
+          <Route path="/professor/turmas/:idTurma/disciplinas/:idDisciplina/inserir-avaliacao" element={<InserirAvaliacao />} />
+          <Route path="/professor/turmas/:idTurma/disciplinas/:idDisciplina/lancar-notas" element={<LancarNotas />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/login-professor" />} />

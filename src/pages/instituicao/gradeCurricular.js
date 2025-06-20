@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import Fundo from '../../components/fundo-nav';
 import { useNavigate, useParams } from 'react-router-dom';
-import { FaFilter, FaTrash, FaEdit } from 'react-icons/fa';
+import { FaTrash, FaEdit } from 'react-icons/fa';
 import instituicaoService from '../../services/instituicaoService';
 
 function GerenciarGradesCurriculares() {
-  const [mostrarFiltro, setMostrarFiltro] = useState(false);
   const [disciplinas, setDisciplinas] = useState([]);
   const [professores, setProfessores] = useState([]);
   const [semestres, setSemestres] = useState([]);
@@ -17,7 +16,6 @@ function GerenciarGradesCurriculares() {
     semestre: '',
     carga_horaria: '',
   });
-  const [editingItemId, setEditingItemId] = useState(null);
 
   const { idTurma } = useParams();
   const navigate = useNavigate();
@@ -121,71 +119,43 @@ function GerenciarGradesCurriculares() {
       return;
     }
     const token = localStorage.getItem('token');
-    if (editingItemId !== null) {
-      const originalItem = itens[editingItemId];
-      try {
-        await instituicaoService.editarDisciplinaSemestre(
-          originalItem.idDisciplina,
-          originalItem.idSemestre,
-          originalItem.idProfessor,
-          disciplinaObj.idDisciplina,
-          semestreObj.idSemestre,
-          professorObj.idProfessor,
-          token
-        );
-        alert('Disciplina editada com sucesso!');
-        setItens((prev) =>
-          prev.map((item, idx) =>
-            idx === editingItemId
-              ? {
-                  ...item,
-                  disciplina: disciplinaObj,
-                  professor: professorObj,
-                  semestre: semestreObj?.semestre || form.semestre,
-                  idDisciplina: disciplinaObj?.idDisciplina,
-                  idProfessor: professorObj?.idProfessor,
-                  idSemestre: semestreObj?.idSemestre,
-                  carga_horaria: form.carga_horaria,
-                }
-              : item
-          )
-        );
-        setEditingItemId(null);
-      } catch (err) {
-        alert(`Erro ao editar disciplina: ${err.message || 'Erro desconhecido'}\nDetalhes: ${err.response?.data?.message || 'Nenhum detalhe adicional.'}`);
-      }
-    } else {
-      const itemExistente = itens.find(item =>
-        item.idDisciplina === disciplinaObj.idDisciplina &&
-        item.idSemestre === semestreObj.idSemestre
+    
+    const itemExistente = itens.find(item =>
+      item.idDisciplina === disciplinaObj.idDisciplina &&
+      item.idSemestre === semestreObj.idSemestre
+    );
+    if (itemExistente) {
+      alert('Esta disciplina já foi adicionada para este semestre!');
+      return;
+    }
+    try {
+      console.log("Enviando:", {
+        idDisciplina: disciplinaObj.idDisciplina,
+        idSemestre: semestreObj.idSemestre,
+        idProfessor: professorObj.idProfessor,
+      });
+      await instituicaoService.cadastrarDisciplinaSemestre(
+        disciplinaObj.idDisciplina,
+        semestreObj.idSemestre,
+        professorObj.idProfessor,
+        token
       );
-      if (itemExistente) {
-        alert('Esta disciplina já foi adicionada para este semestre!');
-        return;
-      }
-      try {
-        await instituicaoService.cadastrarDisciplinaSemestre(
-          disciplinaObj.idDisciplina,
-          semestreObj.idSemestre,
-          professorObj.idProfessor,
-          token
-        );
-        alert('Disciplina adicionada com sucesso!');
-        setItens((prev) => [
-          ...prev,
-          {
-            disciplina: disciplinaObj,
-            professor: professorObj,
-            semestre: semestreObj?.semestre || form.semestre,
-            idDisciplina: disciplinaObj?.idDisciplina,
-            idProfessor: professorObj?.idProfessor,
-            idSemestre: semestreObj?.idSemestre,
-            carga_horaria: form.carga_horaria,
-          },
-        ]);
-      } catch (err) {
-        alert(`Erro ao adicionar disciplina: ${err.message || 'Erro desconhecido'}\nDetalhes: ${err.response?.data?.message || 'Nenhum detalhe adicional.'}`);
-      }
+
+      alert('Disciplina adicionada com sucesso!');
+      setItens((prev) => [
+        ...prev,
+        {
+          disciplina: disciplinaObj,
+          professor: professorObj,
+          semestre: semestreObj?.semestre || form.semestre,
+          idDisciplina: disciplinaObj?.idDisciplina,
+          idProfessor: professorObj?.idProfessor,
+          idSemestre: semestreObj?.idSemestre,
+          carga_horaria: form.carga_horaria,
+        },
+      ]);
+    } catch (err) {
+      alert(`Erro ao adicionar disciplina: ${err.message || 'Erro desconhecido'}\nDetalhes: ${err.response?.data?.message || 'Nenhum detalhe adicional.'}`);
     }
     setForm({ disciplina: '', professor: '', semestre: '', carga_horaria: '' });
   };
@@ -211,28 +181,11 @@ function GerenciarGradesCurriculares() {
   };
 
   const handleEditar = (idx) => {
-    if (editingItemId === idx) {
-      setEditingItemId(null);
-      setForm({ disciplina: '', professor: '', semestre: '', carga_horaria: '' });
-      return;
-    }
-    const itemToEdit = itens[idx];
-    setForm({
-      disciplina: String(itemToEdit.idDisciplina) || '',
-      professor: String(itemToEdit.idProfessor) || '',
-      semestre: String(itemToEdit.idSemestre) || '',
-      carga_horaria: itemToEdit.carga_horaria || '',
-    });
-    setEditingItemId(idx);
+    alert('Funcionalidade de edição foi desativada. Por favor, remova e adicione novamente a disciplina.');
   };
 
   const handleCancelar = () => {
-    if (editingItemId === null) {
-      navigate('/turmas');
-    } else {
-      setEditingItemId(null);
-      setForm({ disciplina: '', professor: '', semestre: '', carga_horaria: '' });
-    }
+    navigate('/turmas');
   };
 
   const handleFinalizar = async () => {
@@ -244,18 +197,8 @@ function GerenciarGradesCurriculares() {
     <Fundo>
       <div style={styles.wrapper}>
         <div style={styles.header}>
-          <FaFilter
-            style={styles.filterButton}
-            onClick={() => setMostrarFiltro(!mostrarFiltro)}
-            title="Filtrar"
-          />
           <h2 style={styles.titulo}>Gerenciar Grades Curriculares</h2>
         </div>
-        {mostrarFiltro && (
-          <div style={styles.filtroOverlay}>
-            <div style={{ padding: '10px', background: '#d9d9d9' }}>Filtros (em breve)</div>
-          </div>
-        )}
         <form style={styles.formulario} onSubmit={handleAdicionar}>
           <select
             name="disciplina"
@@ -312,7 +255,7 @@ function GerenciarGradesCurriculares() {
             disabled
           />
           <button type="submit" style={styles.botaoAdicionar}>
-            {editingItemId !== null ? '✓' : '+'}
+            +
           </button>
         </form>
         <div style={styles.tabelaContainer}>
@@ -345,7 +288,7 @@ function GerenciarGradesCurriculares() {
                       style={{ ...styles.iconeAcao, color: '#FFB703' }}
                       size={22}
                       onClick={() => handleEditar(idx)}
-                      title="Editar"
+                      title="Editar (desativado)"
                     />
                     <FaTrash
                       style={{ ...styles.iconeAcao, color: '#ff0000' }}
@@ -374,7 +317,7 @@ function GerenciarGradesCurriculares() {
         </div>
         <div style={styles.botoesContainer}>
           <button type="button" style={styles.botaoCancelar} onClick={handleCancelar}>
-            {editingItemId !== null ? 'Limpar Edição' : 'Cancelar'}
+            Cancelar
           </button>
           <button type="button" style={styles.botaoCadastrar} onClick={handleFinalizar}>
             Finalizar
@@ -401,11 +344,6 @@ const styles = {
     alignItems: 'center',
     marginBottom: '30px',
     position: 'relative',
-  },
-  filterButton: {
-    fontSize: '24px',
-    color: '#FD750D',
-    cursor: 'pointer',
   },
   titulo: {
     position: 'absolute',

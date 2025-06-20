@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import Fundo from '../../components/fundo-nav';
 import { useNavigate, useParams } from 'react-router-dom';
+import { FiEye, FiEyeOff } from 'react-icons/fi';
 import Upload from '../../img/sem-preenchimento/upload-icon.png';
 import instituicaoService from '../../services/instituicaoService';
 
-// Máscaras (mantendo igual ao Cadastro)
 function maskCPF(value) {
   return value
     .replace(/\D/g, '')
@@ -20,11 +20,17 @@ function maskTelefone(value) {
     .slice(0, 15);
 }
 
+function formatarDataISO(dataString) {
+  if (!dataString) return '';
+  return dataString.split('T')[0]; 
+}
+
+
 export default function EdicaoUsuario() {
   const navigate = useNavigate();
-  const { tipo, id } = useParams(); // /edicao-usuario/:tipo/:id
-
+  const { tipo, id } = useParams(); 
   const [nomeArquivo, setNomeArquivo] = useState('');
+  const [mostrarSenha, setMostrarSenha] = useState(false); 
   const [cursos, setCursos] = useState([]);
   const [turmas, setTurmas] = useState([]);
   const [form, setForm] = useState({
@@ -87,32 +93,40 @@ export default function EdicaoUsuario() {
   }, [form.id_curso]);
 
   // Busca usuário para edição
-  useEffect(() => {
-    async function fetchUsuario() {
-      const token = localStorage.getItem('token');
-      if (tipo === 'ALUNO') {
-        const aluno = await instituicaoService.buscarAlunoPorId(id, token); 
-        setForm({
-          ...aluno,
-          cpf: maskCPF(aluno.cpf || ''),
-          telefone: maskTelefone(aluno.telefone || ''),
-          endereco: aluno.logradouro || '',
-          senha: '', 
-        });
-      } else if (tipo === 'PROFESSOR') {
-        const prof = await instituicaoService.buscarProfessorPorId(id, token); 
-        setForm({
-          ...prof,
-          cpf: maskCPF(prof.cpf || ''),
-          telefone: maskTelefone(prof.telefone || ''),
-          endereco: prof.logradouro || '',
-          senha: '', 
-        });
-        setNomeArquivo(prof.diploma || '');
-      }
+useEffect(() => {
+  async function fetchUsuario() {
+    const token = localStorage.getItem('token');
+    console.log("ID recebido:", id);
+    console.log("TIPO recebido:", tipo, "→ Normalizado:", tipo);
+
+    if (tipo === 'aluno') {
+      const aluno = await instituicaoService.buscarAlunoPorId(id, token);
+      setForm({
+        ...aluno,
+        cpf: maskCPF(aluno.cpf || ''),
+        telefone: maskTelefone(aluno.telefone || ''),
+        endereco: aluno.logradouro || '',
+        senha: '',
+        dt_nascimento: formatarDataISO(aluno.dt_nascimento),
+        dt_inicio: formatarDataISO(aluno.dt_inicio),
+      });
+    } else if (tipo === 'professor') {
+      const prof = await instituicaoService.buscarProfessorPorId(id, token);
+      setForm({
+        ...prof,
+        cpf: maskCPF(prof.cpf || ''),
+        telefone: maskTelefone(prof.telefone || ''),
+        endereco: prof.logradouro || '',
+        senha: '',
+        dt_nascimento: formatarDataISO(prof.dt_nascimento),
+        dt_admissao: formatarDataISO(prof.dt_admissao),
+      });
+      setNomeArquivo(prof.diploma || '');
     }
-    fetchUsuario();
-  }, [tipo, id]);
+  }
+
+  fetchUsuario();
+}, [tipo, id]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -176,8 +190,8 @@ export default function EdicaoUsuario() {
     const token = localStorage.getItem('token');
     const idInstituicao = localStorage.getItem('id_instituicao');
     try {
-      if (tipo === 'ALUNO') {
-        // Validar se necessário
+      if (tipo === 'aluno') {
+
         const dataAluno = {
           ...form,
           logradouro: form.endereco,
@@ -186,7 +200,7 @@ export default function EdicaoUsuario() {
           dt_inicio: form.dt_inicio,
           turno: form.turno,
         };
-        await instituicaoService.editarAluno(idInstituicao, id, dataAluno, token);
+        await instituicaoService.editarAluno(id, dataAluno, token);
         alert('Aluno editado com sucesso!');
         navigate('/home-instituicao');
       } else if (tipo === 'PROFESSOR') {
@@ -206,7 +220,6 @@ export default function EdicaoUsuario() {
     }
   };
 
-  // ------------------- RENDER ----------------------
   return (
     <Fundo>
       <div style={styles.wrapper}>
@@ -301,14 +314,24 @@ export default function EdicaoUsuario() {
               value={form.cidade}
               onChange={handleChange}
             />
-            <input
-              name="senha"
-              type="password"
-              style={styles.input}
-              placeholder="Senha"
-              value={form.senha}
-              onChange={handleChange}
-            />
+            <div style={styles.senhaContainer}>
+              <input
+                name="senha"
+                type={mostrarSenha ? 'text' : 'password'}
+                style={styles.input}
+                placeholder="Senha Padrão"
+                value={form.senha}
+                onChange={handleChange}
+              />
+              <button
+                type="button"
+                onClick={() => setMostrarSenha((prev) => !prev)}
+                style={styles.olhinhoButton}
+                aria-label={mostrarSenha ? 'Ocultar senha' : 'Mostrar senha'}
+              >
+                {mostrarSenha ? <FiEyeOff size={20} color="#787878" /> : <FiEye size={20} color="#787878" />}
+              </button>
+            </div>
 
             {/* ========== CAMPOS PARA ALUNO ========== */}
             {tipo === 'ALUNO' && (
@@ -362,7 +385,6 @@ export default function EdicaoUsuario() {
               </>
             )}
 
-            {/* ========== CAMPOS PARA PROFESSOR ========== */}
             {tipo === 'PROFESSOR' && (
               <>
                 <select
@@ -444,7 +466,6 @@ export default function EdicaoUsuario() {
               </>
             )}
 
-            {/* ========== BOTÕES ========== */}
             <div style={styles.botoesContainer}>
               <button
                 type="button"
@@ -453,7 +474,7 @@ export default function EdicaoUsuario() {
               >
                 Cancelar
               </button>
-              <button type="submit" style={styles.botaoCadastrar}>
+              <button type="submit" style={styles.botaoEditar}>
                 Editar
               </button>
             </div>
@@ -524,7 +545,7 @@ const styles = {
     fontSize: '16px',
     fontFamily: 'Lexend, sans-serif',
   },
-  botaoCadastrar: {
+  botaoEditar: {
     backgroundColor: '#27AE60',
     color: '#fff',
     border: 'none',
@@ -560,5 +581,18 @@ const styles = {
     userSelect: 'none',
     transition: 'background-color 0.2s ease',
     minWidth: 0,
+  },
+  senhaContainer: {
+    position: 'relative',
+    display: 'flex',
+    alignItems: 'center',
+  },
+  olhinhoButton: {
+    position: 'absolute',
+    right: '12px',
+    background: 'transparent',
+    border: 'none',
+    cursor: 'pointer',
+    padding: 0,
   },
 };

@@ -1,15 +1,23 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { Oval } from 'react-loader-spinner';
 import Logo from "../img/logo/logo-branca-sFundo.png";
 import UserIcon from "../img/sem-preenchimento/userIcon.png";
-import LogoutIcon from "../img/sem-preenchimento/logout.png"; 
+import LogoutIcon from "../img/sem-preenchimento/logout.png";
 
 function Fundo({ children }) {
   const [showMenu, setShowMenu] = useState(false);
+  const [loading, setLoading] = useState(true);
   const menuRef = useRef(null);
   const navigate = useNavigate();
 
-  // Fecha o menu ao clicar fora
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 1000); // Ajuste conforme necessário
+    return () => clearTimeout(timer);
+  }, []);
+
   useEffect(() => {
     function handleClickOutside(event) {
       if (menuRef.current && !menuRef.current.contains(event.target)) {
@@ -50,7 +58,23 @@ function Fundo({ children }) {
           )}
         </div>
       </nav>
-      {children}
+
+      {loading ? (
+        <div style={styles.loadingContainer}>
+          <Oval
+            height={80}
+            width={80}
+            color="#092851"
+            secondaryColor="#ccc"
+            strokeWidth={4}
+            strokeWidthSecondary={4}
+            visible={true}
+            ariaLabel="oval-loading"
+          />
+        </div>
+      ) : (
+        children
+      )}
     </div>
   );
 }
@@ -115,5 +139,11 @@ const styles = {
     width: '20px',
     height: '20px',
     marginRight: '6px'
+  },
+  loadingContainer: {
+    minHeight: 'calc(100vh - 80px)', 
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 };
