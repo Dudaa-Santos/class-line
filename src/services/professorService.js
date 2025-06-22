@@ -199,7 +199,7 @@ const lancarNotas = async (idAvaliacao, body, token) => {
   try {
     const response = await httpClient.post(
       body,
-      `/nota/avaliacao/{idAvaliacao}/notas`,
+      `/nota/avaliacao/${idAvaliacao}/notas`,
       {
         headers: {
           Authorization: `Bearer ${token}`,

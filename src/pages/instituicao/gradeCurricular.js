@@ -181,6 +181,7 @@ function GerenciarGradesCurriculares() {
   };
 
   const handleEditar = (item) => {
+    console.log("Editar item:", item);
     navigate(`/disciplinasemestre/trocar-professor/${idTurma}/${item.idDisciplina}/${item.idSemestre}`);
   };
 

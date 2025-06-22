@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Fundo from '../../components/fundo-nav';
 import professorService from '../../services/professorService';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 function InserirAvaliacao() {
   const [avaliacoes, setAvaliacoes] = useState([]);
@@ -15,11 +15,11 @@ function InserirAvaliacao() {
   const { idTurma, idDisciplina } = useParams();
   const idProfessor = localStorage.getItem('id_professor');
   const token = localStorage.getItem('token');
+  const navigate = useNavigate();
 
   useEffect(() => {
     async function carregarAvaliacoes() {
       try {
-
         const avaliacoesAPI = await professorService.buscarAvaliacao(
           idDisciplina,
           idProfessor,
@@ -76,12 +76,8 @@ function InserirAvaliacao() {
     }
   };
 
-  const handleCancelar = () => {
+  const handleVoltar = () => {
     window.history.back();
-  };
-
-  const handleFinalizar = () => {
-    alert('Avaliações salvas com sucesso!');
   };
 
   const formatarTipo = (tipo) => {
@@ -132,7 +128,7 @@ function InserirAvaliacao() {
               ))}
               {avaliacoes.length === 0 && (
                 <tr>
-                  <td colSpan={5} style={{ textAlign: 'center', padding: '20px', color: '#888' }}>
+                  <td colSpan={4} style={{ textAlign: 'center', padding: '20px', color: '#888' }}>
                     Nenhuma avaliação adicionada.
                   </td>
                 </tr>
@@ -142,8 +138,7 @@ function InserirAvaliacao() {
         </div>
 
         <div style={styles.botoesContainer}>
-          <button style={styles.botaoCancelar} onClick={handleCancelar}>Cancelar</button>
-          <button style={styles.botaoCadastrar} onClick={handleFinalizar}>Finalizar</button>
+          <button style={styles.botaoCancelar} onClick={handleVoltar}>Voltar</button>
         </div>
       </div>
     </Fundo>
@@ -217,20 +212,10 @@ const styles = {
   botoesContainer: {
     display: 'flex',
     justifyContent: 'center',
-    gap: '24px',
     marginTop: '32px',
   },
   botaoCancelar: {
     backgroundColor: '#FD750D',
-    color: '#fff',
-    border: 'none',
-    padding: '12px 40px',
-    borderRadius: '8px',
-    cursor: 'pointer',
-    fontSize: '16px',
-  },
-  botaoCadastrar: {
-    backgroundColor: '#27AE60',
     color: '#fff',
     border: 'none',
     padding: '12px 40px',

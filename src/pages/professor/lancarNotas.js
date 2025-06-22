@@ -1,18 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import Fundo from '../../components/fundo-nav';
 import professorService from '../../services/professorService';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 
 function LancarNotas() {
   const { idTurma, idDisciplina } = useParams();
   const idProfessor = localStorage.getItem('id_professor');
   const token = localStorage.getItem('token');
+  const navigate = useNavigate();
 
   const [avaliacoes, setAvaliacoes] = useState([]);
   const [avaliacaoSelecionada, setAvaliacaoSelecionada] = useState('');
   const [alunosNotas, setAlunosNotas] = useState([]);
 
-  // Buscar avaliações da disciplina
   useEffect(() => {
     async function carregarAvaliacoes() {
       try {
@@ -30,25 +30,26 @@ function LancarNotas() {
     }
   }, [idTurma, idDisciplina, idProfessor, token]);
 
-  // Buscar alunos vinculados à avaliação selecionada
   useEffect(() => {
-    async function carregarAlunosDaAvaliacao() {
+    async function carregarAlunos() {
+      if (!avaliacaoSelecionada) return;
+
       try {
-        if (!avaliacaoSelecionada) return;
-        const alunos = await professorService.buscarNotas(avaliacaoSelecionada, token);
-        const lista = alunos.map(aluno => ({
-          idAluno: aluno.idAluno,
+        const alunosAPI = await professorService.buscarAluno(idTurma, token);
+        const lista = alunosAPI.map(aluno => ({
+          idAluno: aluno.idAluno ?? aluno.id,
           nome: aluno.nome,
-          nota: aluno.nota || ''
+          nota: ''
         }));
         setAlunosNotas(lista);
       } catch (error) {
-        console.error("Erro ao buscar alunos/notas:", error);
+        console.error("Erro ao buscar alunos:", error);
+        alert("Erro ao buscar alunos.");
       }
     }
 
-    carregarAlunosDaAvaliacao();
-  }, [avaliacaoSelecionada, token]);
+    carregarAlunos();
+  }, [avaliacaoSelecionada]);
 
   const handleNotaChange = (idx, novaNota) => {
     const atualizados = [...alunosNotas];
@@ -65,8 +66,10 @@ function LancarNotas() {
           nota: parseFloat(a.nota)
         }))
       };
+
       await professorService.lancarNotas(payload, token);
       alert('Notas lançadas com sucesso!');
+      navigate(`/grade-curricular/${idTurma}`);
     } catch (error) {
       console.error("Erro ao lançar notas:", error);
       alert("Erro ao lançar notas.");
@@ -74,7 +77,7 @@ function LancarNotas() {
   };
 
   const handleCancelar = () => {
-    window.history.back();
+    navigate(`/grade-curricular/${idTurma}`);
   };
 
   return (
@@ -82,11 +85,11 @@ function LancarNotas() {
       <div style={styles.wrapper}>
         <h2 style={styles.titulo}>Lançar Notas</h2>
 
-        <div style={{ marginBottom: '20px' }}>
+        <div style={styles.selectContainer}>
           <select
             value={avaliacaoSelecionada}
             onChange={(e) => setAvaliacaoSelecionada(e.target.value)}
-            style={styles.input}
+            style={styles.select}
           >
             <option value="">Selecione uma Avaliação</option>
             {avaliacoes.map((av) => (
@@ -101,14 +104,15 @@ function LancarNotas() {
               <thead>
                 <tr>
                   <th style={styles.th}>Nome do Aluno</th>
-                  <th style={styles.th}>Nota</th>
+                  <th style={styles.thNota}>Nota</th>
                 </tr>
               </thead>
               <tbody>
                 {alunosNotas.map((item, idx) => (
                   <tr key={item.idAluno}>
                     <td style={styles.td}>{item.nome}</td>
-                    <td style={styles.td}>
+                    <td style={{ ...styles.td, textAlign: 'center' }}>
+                    <div style={{ display: 'flex', justifyContent: 'center' }}>
                       <input
                         type="number"
                         min="0"
@@ -116,9 +120,10 @@ function LancarNotas() {
                         step="0.1"
                         value={item.nota}
                         onChange={(e) => handleNotaChange(idx, e.target.value)}
-                        style={styles.input}
+                        style={styles.inputNota}
                       />
-                    </td>
+                    </div>
+                  </td>
                   </tr>
                 ))}
               </tbody>
@@ -140,26 +145,37 @@ export default LancarNotas;
 const styles = {
   wrapper: {
     minHeight: '100vh',
-    padding: '30px 40px',
+    padding: '30px 20px',
     fontFamily: 'Lexend, sans-serif',
     backgroundColor: '#f6f6f6',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
   },
   titulo: {
-    textAlign: 'center',
     fontSize: '28px',
     fontWeight: 'bold',
     color: '#002B65',
     marginBottom: '24px',
+    textAlign: 'center',
   },
-  input: {
+  selectContainer: {
+    display: 'flex',
+    justifyContent: 'center',
+    marginBottom: '20px',
+    width: '100%',
+  },
+  select: {
     padding: '12px',
     borderRadius: '8px',
     border: '1px solid #D9D9D9',
     fontSize: '14px',
     width: '100%',
+    maxWidth: '400px',
   },
   tabelaContainer: {
-    maxHeight: '44vh',
+    width: '100%',
+    maxWidth: '700px',
     overflowY: 'auto',
     backgroundColor: '#fff',
     borderRadius: '10px',
@@ -175,11 +191,26 @@ const styles = {
     padding: '14px',
     fontWeight: 600,
     fontSize: '15px',
+    textAlign: 'left',
+  },
+  thNota: {
+    backgroundColor: '#D9D9D9',
+    padding: '14px',
+    fontWeight: 600,
+    fontSize: '15px',
+    textAlign: 'center',
   },
   td: {
     padding: '14px',
     fontSize: '14px',
     borderTop: '1px solid #eee',
+  },
+  inputNota: {
+    padding: '10px',
+    borderRadius: '6px',
+    border: '1px solid #ccc',
+    fontSize: '14px',
+    width: '100px',
   },
   botoesContainer: {
     display: 'flex',
