@@ -5,10 +5,13 @@ import instituicaoService from '../../services/instituicaoService';
 
 export default function EdicaoDisciplina() {
   const [form, setForm] = useState({
+    nome: '',
     carga_horaria: '',
     idProfessor: '',
+    nomeProfessorAntigo: '',
   });
   const [professores, setProfessores] = useState([]);
+  const [idProfessorAntigo, setIdProfessorAntigo] = useState('');
   const navigate = useNavigate();
   const { idTurma, idDisciplina, idSemestre } = useParams();
 
@@ -16,6 +19,7 @@ export default function EdicaoDisciplina() {
     async function carregarDados() {
       const token = localStorage.getItem('token');
       const idInstituicao = localStorage.getItem('id_instituicao');
+
       try {
         const lista = await instituicaoService.buscarProfessores(idInstituicao, token);
         const professoresNormalizados = lista.map(p => ({
@@ -23,12 +27,29 @@ export default function EdicaoDisciplina() {
           nome: p.nome,
         }));
         setProfessores(professoresNormalizados);
+
+        const dadosDisciplina = await instituicaoService.buscarDisciplinasSemestres(
+          idDisciplina,
+          idSemestre,
+          idTurma,
+          token
+        );
+
+        setForm({
+          nome: dadosDisciplina.nome || '',
+          carga_horaria: dadosDisciplina.carga_horaria || '',
+          idProfessor: '',
+          nomeProfessorAntigo: dadosDisciplina.nomeProfessor || '',
+        });
+
+        setIdProfessorAntigo(String(dadosDisciplina.idProfessor));
       } catch (err) {
-        alert("Erro ao carregar professores.");
+        alert("Erro ao carregar dados.");
       }
     }
+
     carregarDados();
-  }, []);
+  }, [idDisciplina, idSemestre, idTurma]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -42,19 +63,17 @@ export default function EdicaoDisciplina() {
     e.preventDefault();
     const token = localStorage.getItem('token');
 
+    const body = {
+      idDisciplina: Number(idDisciplina),
+      idSemestre: Number(idSemestre),
+      idProfessorAntigo,
+      idProfessorNovo: String(form.idProfessor),
+    };
+
     try {
-      await instituicaoService.editarDisciplinaSemestre(
-        idDisciplina,
-        idSemestre,
-        idTurma,
-        {
-          carga_horaria: Number(form.carga_horaria),
-          idProfessor: Number(form.idProfessor),
-        },
-        token
-      );
-      alert('Disciplina editada com sucesso!');
-      navigate(`/gerenciar-grades/${idTurma}`);
+      await instituicaoService.editarDisciplinaSemestre(body, token);
+      alert('Professor alterado com sucesso!');
+      navigate(`/grade-curricular/${idTurma}`);
     } catch (error) {
       const msg =
         error?.response?.data?.message || error?.message || 'Erro desconhecido';
@@ -63,7 +82,7 @@ export default function EdicaoDisciplina() {
   };
 
   const handleCancelar = () => {
-    navigate(`/gerenciar-grades/${idTurma}`);
+    navigate(`/grade-curricular/${idTurma}`);
   };
 
   return (
@@ -75,14 +94,46 @@ export default function EdicaoDisciplina() {
           </div>
           <form style={styles.formulario} onSubmit={handleSubmit}>
             <input
+              type="text"
+              style={{
+                ...styles.input,
+                gridColumn: 'span 2',
+                backgroundColor: '#f0f0f0',
+                color: '#777',
+                cursor: 'not-allowed',
+              }}
+              value={form.nome}
+              disabled
+              placeholder="Nome da Disciplina"
+            />
+
+            <input
+              type="text"
+              style={{
+                ...styles.input,
+                gridColumn: 'span 2',
+                backgroundColor: '#f0f0f0',
+                color: '#777',
+                cursor: 'not-allowed',
+              }}
+              value={form.nomeProfessorAntigo}
+              disabled
+              placeholder="Professor Atual"
+            />
+
+            <input
               name="carga_horaria"
               type="number"
-              min="1"
-              style={{ ...styles.input, gridColumn: 'span 2' }}
+              style={{
+                ...styles.input,
+                gridColumn: 'span 2',
+                backgroundColor: '#f0f0f0',
+                color: '#777',
+                cursor: 'not-allowed',
+              }}
               placeholder="Carga Horária (em horas)"
               value={form.carga_horaria}
-              onChange={handleChange}
-              required
+              disabled
             />
 
             <select
@@ -92,7 +143,7 @@ export default function EdicaoDisciplina() {
               onChange={handleChange}
               required
             >
-              <option value="">Selecione o Professor</option>
+              <option value="">Selecione o Novo Professor</option>
               {professores.map((p) => (
                 <option key={p.id} value={p.id}>{p.nome}</option>
               ))}

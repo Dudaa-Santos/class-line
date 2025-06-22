@@ -226,6 +226,19 @@ const buscarDisciplinasSemestres = async (idTurma, token) => {
   return response.data;
 };
 
+const buscarDisciplinaPorId = async (idDisciplina, token) => {
+  const response = await httpClient.get(
+    `/disciplina/${idDisciplina}`,
+    { 
+      headers: { 
+        Authorization: `Bearer ${token}` 
+      } 
+    }
+  );
+  console.log(response.data);
+  return response.data;
+};
+
 const cadastrarDisciplinaSemestre = async (idDisciplina, idSemestre, idProfessor, token) => {
   try {
     const response = await httpClient.post(
@@ -256,14 +269,14 @@ const deletarDisciplinaSemestre = async (idDisciplina, idSemestre, idProfessor, 
   return response.data;
 };
 
-const editarDisciplinaSemestre = async (idDisciplina, idSemestre, idProfessor, token) => {
+const editarDisciplinaSemestre = async (body, token) => {
   const response = await httpClient.put(
-    `/disciplinasemestre/disciplina/${idDisciplina}/semestre/${idSemestre}/professor/${idProfessor}/inativar`,
-    {},
+    `/disciplinasemestre/trocar-professor`,
+    body,
     {
       headers: {
         Authorization: `Bearer ${token}`,
-      }
+      },
     }
   );
   return response.data;
@@ -354,6 +367,7 @@ const instituicaoService = {
   buscarProfessorPorId,
   cadastrarDisciplina,
   buscarDisciplina,
+  buscarDisciplinaPorId,
   buscarSemestres,
   cadastrarDisciplinaSemestre,
   buscarDisciplinasSemestres,

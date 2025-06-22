@@ -46,7 +46,7 @@ export default function LoginInstituicao() {
             <h2 style={styles.headingInst}>Login de Instituição</h2>
             <h2 style={styles.heading}>Bem-vindo(a) ao ClassLine!</h2>
 
-            <form onSubmit={handleLogin} style={styles.form}>
+          <form onSubmit={handleLogin} style={styles.form}>
               <input
                 type="text"
                 placeholder="Login"
@@ -55,56 +55,51 @@ export default function LoginInstituicao() {
                 style={styles.input}
                 autoComplete="username"
               />
-              <div style={styles.senhaContainer}>
-                <input
-                  type={mostrarSenha ? "text" : "password"}
-                  placeholder="Senha"
-                  value={senha}
-                  onChange={(e) => setSenha(e.target.value)}
-                  style={styles.senhaInput}
-                  autoComplete="current-password"
-                />
-                <button
-                  type="button"
-                  onClick={() => setMostrarSenha(!mostrarSenha)}
-                  style={styles.olhinhoButton}
-                  tabIndex={-1}
-                  aria-label={mostrarSenha ? "Ocultar senha" : "Mostrar senha"}
-                >
-                  {mostrarSenha ? (
-                    <FiEyeOff size={22} color="#787878" />
-                  ) : (
-                    <FiEye size={22} color="#787878" />
-                  )}
-                </button>
-              </div>
+            <div style={styles.senhaContainer}>
+              <input
+                type={mostrarSenha ? "text" : "password"}
+                placeholder="Senha"
+                value={senha}
+                onChange={(e) => setSenha(e.target.value)}
+                style={styles.senhaInput}
+              />
+              <button
+                type="button"
+                onClick={() => setMostrarSenha(!mostrarSenha)}
+                style={styles.olhinhoButton}
+                tabIndex={-1}
+                aria-label={mostrarSenha ? "Ocultar senha" : "Mostrar senha"}
+              >
+                {mostrarSenha ? (
+                  <FiEyeOff size={22} color="#787878" />
+                ) : (
+                  <FiEye size={22} color="#787878" />
+                )}
+              </button>
+            </div>
 
-              <button type="submit" style={styles.button} disabled={isLoading}>
+            <button type="submit" style={styles.button} disabled={isLoading}>
               {isLoading ? (
-                <>
-                  <Oval
-                    height={20}
-                    width={20}
-                    color="#fff"
-                    secondaryColor="#34a853"
-                    strokeWidth={4}
-                    strokeWidthSecondary={4}
-                    ariaLabel="carregando"
-                    wrapperStyle={{ display: 'inline-block', marginRight: 7, verticalAlign: 'middle' }}
-                  />
-                </>
+                <Oval
+                  height={20}
+                  width={20}
+                  color="#fff"
+                  secondaryColor="#34a853"
+                  strokeWidth={4}
+                  strokeWidthSecondary={4}
+                  ariaLabel="carregando"
+                  wrapperStyle={{ display: 'inline-block', marginRight: 7, verticalAlign: 'middle' }}
+                />
               ) : (
                 "Acessar"
               )}
             </button>
-              <div style={{ height: '20px', marginTop: '10px', textAlign: 'center', width: '100%' }}>
-                {erro && (
-                  <p style={{ color: 'red', fontSize: '14px', margin: 0 }}>{erro}</p>
-                )}
-              </div>
-            </form>
-          </div>
 
+            {erro && (
+              <p style={{ color: 'red', fontSize: '14px', textAlign: 'center', marginTop: '5px' }}>{erro}</p>
+            )}
+          </form>
+          </div>
           <p style={styles.linkProfessor}>
             Clique aqui para fazer login como{" "}
             <Link to="/login-professor" style={styles.linkSpan}>
@@ -128,7 +123,6 @@ const styles = {
     alignItems: 'center',
     fontFamily: "'Lexend', sans-serif",
   },
-
   container: {
     width: '87%',
     height: '79%',
@@ -207,17 +201,6 @@ const styles = {
     gap: '8px',
     opacity: 1,
     transition: 'opacity 0.2s',
-  },
-  spinner: {
-    width: '20px',
-    height: '20px',
-    border: '3px solid rgba(52,168,83,0.15)', 
-    borderTop: '3px solid #34a853',           
-    borderRadius: '50%',
-    animation: 'spin 0.8s linear infinite',
-    marginRight: '7px',
-    display: 'inline-block',
-    verticalAlign: 'middle',
   },
   linkProfessor: {
     marginTop: '10px',

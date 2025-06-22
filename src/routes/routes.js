@@ -13,7 +13,7 @@ import CadastroCurso from "../pages/instituicao/cadastroCurso";
 import CadastroDiscplina from "../pages/instituicao/cadastroDisciplina";
 
 import EdicaoUsuario from "../pages/instituicao/edicaoUsuario";
-// import EdicaoDisciplina from "../pages/instituicao/edicaoDisciplina";
+import EdicaoDisciplina from "../pages/instituicao/edicaoDisciplina";
 
 import Disciplinas from "../pages/professor/disciplinas";
 import AlunosDisciplina from "../pages/professor/alunosDisciplina";
@@ -45,6 +45,7 @@ const Rotas = () => {
           <Route path="/cadastro-turma" element={<CadastroTurma />} />
           <Route path="/cadastro-curso" element={<CadastroCurso />} />
           <Route path="/cadastro-disciplina" element={<CadastroDiscplina />} />
+          <Route path="/disciplinasemestre/trocar-professor/:idTurma/:idDisciplina/:idSemestre" element={<EdicaoDisciplina />} />
           <Route path="/grade-curricular/:idTurma" element={<GradeCurricular />} />
           <Route path="/alunos" element={<Alunos />} />
           <Route path="/professores" element={<Professores />} />

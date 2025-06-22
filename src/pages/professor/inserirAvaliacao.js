@@ -19,11 +19,6 @@ function InserirAvaliacao() {
   useEffect(() => {
     async function carregarAvaliacoes() {
       try {
-        console.log("Buscando avaliações com:");
-        console.log("idTurma:", idTurma);
-        console.log("idDisciplina:", idDisciplina);
-        console.log("idProfessor:", idProfessor);
-        console.log("token:", token);
 
         const avaliacoesAPI = await professorService.buscarAvaliacao(
           idDisciplina,
@@ -53,12 +48,6 @@ function InserirAvaliacao() {
   const handleAdicionar = async (e) => {
     e.preventDefault();
 
-    console.log("Dados do formulário:", form);
-    console.log("idTurma:", idTurma);
-    console.log("idDisciplina:", idDisciplina);
-    console.log("idProfessor:", idProfessor);
-    console.log("token:", token);
-
     if (!form.tipo || !form.nome || !form.peso || !form.data) {
       alert('Preencha todos os campos!');
       return;
@@ -72,7 +61,13 @@ function InserirAvaliacao() {
         idProfessor
       };
 
-      await professorService.inserirAvaliacao(dadosParaEnviar);
+      await professorService.inserirAvaliacao(
+        idDisciplina,
+        idProfessor,
+        idTurma,
+        form,
+        token
+      );
       setAvaliacoes((prev) => [...prev, dadosParaEnviar]);
       setForm({ tipo: '', nome: '', peso: '', data: '' });
     } catch (error) {

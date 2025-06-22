@@ -180,8 +180,8 @@ function GerenciarGradesCurriculares() {
     }
   };
 
-  const handleEditar = (idx) => {
-    alert('Funcionalidade de edição foi desativada. Por favor, remova e adicione novamente a disciplina.');
+  const handleEditar = (item) => {
+    navigate(`/disciplinasemestre/trocar-professor/${idTurma}/${item.idDisciplina}/${item.idSemestre}`);
   };
 
   const handleCancelar = () => {
@@ -287,8 +287,8 @@ function GerenciarGradesCurriculares() {
                     <FaEdit
                       style={{ ...styles.iconeAcao, color: '#FFB703' }}
                       size={22}
-                      onClick={() => handleEditar(idx)}
-                      title="Editar (desativado)"
+                      onClick={() => handleEditar(item)}
+                      title="Editar"
                     />
                     <FaTrash
                       style={{ ...styles.iconeAcao, color: '#ff0000' }}
