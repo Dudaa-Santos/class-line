@@ -24,7 +24,7 @@ function maskTelefone(value) {
 export default function CadastroUsuario() {
   const [tipoUsuario, setTipoUsuario] = useState('');
   const [nomeArquivo, setNomeArquivo] = useState('');
-  const [mostrarSenha, setMostrarSenha] = useState(false); 
+  const [mostrarSenha, setMostrarSenha] = useState(false);
   const [cursos, setCursos] = useState([]);
   const [turmas, setTurmas] = useState([]);
   const [form, setForm] = useState({
@@ -39,7 +39,7 @@ export default function CadastroUsuario() {
     numero: '',
     cidade: '',
     senha: '',
-    turno: '',            
+    turno: '',
     id_curso: '',
     id_turma: '',
     dt_inicio: '',
@@ -50,7 +50,6 @@ export default function CadastroUsuario() {
   });
   const navigate = useNavigate();
 
-  // Carrega cursos 
   useEffect(() => {
     const token = localStorage.getItem('token');
     async function carregarCursos() {
@@ -68,7 +67,6 @@ export default function CadastroUsuario() {
     carregarCursos();
   }, []);
 
-  // Carrega turmas quando o curso é selecionado
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (!form.id_curso) {
@@ -92,7 +90,7 @@ export default function CadastroUsuario() {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    
+
     if (name === 'id_turma') {
       const turmaSelecionada = turmas.find((t) => String(t.idTurma) === value);
       const turnoDaTurma = turmaSelecionada ? turmaSelecionada.turno : '';
@@ -117,7 +115,6 @@ export default function CadastroUsuario() {
 
   const handleTipoUsuario = (e) => {
     setTipoUsuario(e.target.value);
-    // Limpa campos específicos ao trocar tipo
     setForm((prev) => ({
       ...prev,
       turno: '',
@@ -163,7 +160,6 @@ export default function CadastroUsuario() {
       return;
     }
 
-    // Validação básica
     if (!form.nome || !form.email || !form.cpf) {
       alert('Preencha pelo menos Nome, Email e CPF.');
       return;
@@ -249,7 +245,6 @@ export default function CadastroUsuario() {
         <div style={styles.container}>
           <h2 style={styles.titulo}>Cadastro de Usuário</h2>
           <form style={styles.formulario} onSubmit={handleSubmit}>
-            {/* Dados básicos */}
             <input
               name="nome"
               style={styles.input}
@@ -279,13 +274,9 @@ export default function CadastroUsuario() {
 
             <input
               name="dt_nascimento"
-              type="text"
+              type="date"
               placeholder="Data de Nascimento"
               value={form.dt_nascimento}
-              onFocus={(e) => (e.target.type = 'date')}
-              onBlur={(e) => {
-                if (!e.target.value) e.target.type = 'text';
-              }}
               onChange={handleChange}
               style={styles.input}
             />
@@ -371,13 +362,9 @@ export default function CadastroUsuario() {
               <>
                 <input
                   name="dt_inicio"
-                  type="text"
+                  type="date"
                   placeholder="Data da Matrícula"
                   value={form.dt_inicio}
-                  onFocus={(e) => (e.target.type = 'date')}
-                  onBlur={(e) => {
-                    if (!e.target.value) e.target.type = 'text';
-                  }}
                   onChange={handleChange}
                   style={styles.input}
                   required
@@ -465,13 +452,9 @@ export default function CadastroUsuario() {
                   />
                   <input
                     name="dt_admissao"
-                    type="text"
+                    type="date"
                     placeholder="Data de Admissão"
                     value={form.dt_admissao}
-                    onFocus={(e) => (e.target.type = 'date')}
-                    onBlur={(e) => {
-                      if (!e.target.value) e.target.type = 'text';
-                    }}
                     onChange={handleChange}
                     style={styles.input}
                     required

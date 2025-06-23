@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Fundo from '../../components/fundo-nav';
 import professorService from '../../services/professorService';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 
 function InserirAvaliacao() {
   const [avaliacoes, setAvaliacoes] = useState([]);
@@ -15,7 +15,6 @@ function InserirAvaliacao() {
   const { idTurma, idDisciplina } = useParams();
   const idProfessor = localStorage.getItem('id_professor');
   const token = localStorage.getItem('token');
-  const navigate = useNavigate();
 
   useEffect(() => {
     async function carregarAvaliacoes() {

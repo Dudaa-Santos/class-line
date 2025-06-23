@@ -43,10 +43,21 @@ const buscarTurmaProfessor = async ( idProfessor, token) => {
 };
 
 const buscarDisciplinaTurma = async ( idTurma, token) => {
-  console.log( idTurma)
-  console.log( "Token:", token)
   const response = await httpClient.get(
     `/disciplina/turma/${idTurma}`,
+    { 
+      headers: { 
+        Authorization: `Bearer ${token}` 
+      } 
+    }
+  );
+  console.log(response.data);
+  return response.data;
+};
+
+const buscarDisciplinaProfessor = async ( idProfessor, token) => {
+  const response = await httpClient.get(
+    `/disciplina/professor/${idProfessor}`,
     { 
       headers: { 
         Authorization: `Bearer ${token}` 
@@ -198,8 +209,8 @@ const buscarAvaliacao = async (idDisciplina, idProfessor, idTurma, token) => {
 const lancarNotas = async (idAvaliacao, body, token) => {
   try {
     const response = await httpClient.post(
-      body,
       `/nota/avaliacao/${idAvaliacao}/notas`,
+      body,                                    
       {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -230,11 +241,30 @@ const buscarNotas = async (idAvaliacao, token) => {
   }
 };
 
+const boletim = async (idAluno, token) => {
+  try {
+    const response = await httpClient.get(
+      `/aluno/boletim/${idAluno}`,
+      {
+        headers: {  
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    console.log(response.data);
+    return response.data;
+  } catch (error) {
+    
+    throw error;
+  }
+};
+
 const professorService = {
   loginProfessor,
   buscarProfessor,
   buscarTurmaProfessor,
   buscarDisciplinaTurma,
+  buscarDisciplinaProfessor,
   buscarTurmaPorId,
   buscarAlunoDisciplina,
   lancarPresenca,
@@ -244,7 +274,8 @@ const professorService = {
   inserirAvaliacao,
   buscarAvaliacao,
   lancarNotas,
-  buscarNotas
+  buscarNotas,
+  boletim
 };
 
 export default professorService;

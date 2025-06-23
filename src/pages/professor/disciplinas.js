@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import professorService from "../../services/professorService";
 import Fundo from "../../components/fundo-nav";
 
@@ -10,23 +10,19 @@ import avaliacaoIcon from "../../img/sem-preenchimento/checkmark.png";
 import notasIcon from "../../img/sem-preenchimento/upload.png";
 import { FaArrowLeft } from "react-icons/fa";
 
-function TurmaDetalhe() {
-  const { id } = useParams();
-  const [idProfessor, setIdProfessor] = useState(null) 
+function Disciplinas() {
   const navigate = useNavigate();
-  const [turma, setTurma] = useState(null);
   const [disciplinas, setDisciplinas] = useState([]);
   const [disciplinaSelecionada, setDisciplinaSelecionada] = useState(null);
   const token = localStorage.getItem("token");
+  const idProfessor = localStorage.getItem("id_professor");
 
   useEffect(() => {
-    setIdProfessor(localStorage.getItem("id_professor"));
-    professorService.buscarTurmaPorId(id, token).then(setTurma);
     professorService
-      .buscarDisciplinaTurma(id, token)
+      .buscarDisciplinaProfessor(idProfessor, token)
       .then(setDisciplinas)
       .catch(() => setDisciplinas([]));
-  }, [id, token]);
+  }, [idProfessor, token]);
 
   const handleDisciplinaClick = (disciplina) => {
     if (disciplinaSelecionada?.idDisciplina === disciplina.idDisciplina) {
@@ -36,97 +32,92 @@ function TurmaDetalhe() {
     }
   };
 
-const handleAcaoClick = (acao) => {
-  if (!disciplinaSelecionada) return;
+  const handleAcaoClick = (acao) => {
+    if (!disciplinaSelecionada) return;
 
-  const idTurma = id;
-  const idDisciplina = disciplinaSelecionada.idDisciplina;
-  let path = '';
+    const idTurma = disciplinaSelecionada.idTurma;
+    const idDisciplina = disciplinaSelecionada.idDisciplina;
+    let path = '';
 
-  switch (acao) {
-    case 'Alunos':
-      path = `/professor/turmas/${idTurma}/disciplinas/${idDisciplina}/alunos`;
-      break;
-    case 'Registrar Presença':
-      path = `/frequencia/turma/${idTurma}/disciplina/${idDisciplina}`;
-      break;
-    case 'Lista de Presença':
-      path = `/professor/turmas/${idTurma}/disciplinas/${idDisciplina}/lista-presenca`;
-      break;
-    case 'Inserir Avaliação':
-      path = `/professor/turmas/${idTurma}/disciplinas/${idDisciplina}/inserir-avaliacao`;
-      break;
-    case 'Lançar Notas':
-      path = `/professor/turmas/${idTurma}/disciplinas/${idDisciplina}/lancar-notas`;
-      break;
-
+    switch (acao) {
+      case 'Alunos':
+        path = `/alunos/disciplina/${idDisciplina}`;
+        break;
+      case 'Registrar Presença':
+        path = `/frequencia/turma/${idTurma}/disciplina/${idDisciplina}`;
+        break;
+      case 'Lista de Presença':
+        path = `/professor/turmas/${idTurma}/disciplinas/${idDisciplina}/lista-presenca`;
+        break;
+      case 'Inserir Avaliação':
+        path = `/professor/turmas/${idTurma}/disciplinas/${idDisciplina}/inserir-avaliacao`;
+        break;
+      case 'Lançar Notas':
+        path = `/professor/turmas/${idTurma}/disciplinas/${idDisciplina}/lancar-notas`;
+        break;
       default:
         return;
-        }
+    }
 
-  navigate(path);
-};
+    navigate(path);
+  };
 
   return (
     <Fundo>
-      {!turma ? (
-        <div></div>
-      ) : (
-        <div style={styles.container}>
-          <div style={styles.layoutRow}>
-            <div style={styles.voltarWrapper}>
-              <button style={styles.botaoVoltar} onClick={() => navigate("/home-professor")}>
-                <FaArrowLeft size={14} />
-              </button>
+      <div style={styles.container}>
+        <div style={styles.layoutRow}>
+          <div style={styles.voltarWrapper}>
+            <button style={styles.botaoVoltar} onClick={() => navigate("/home-professor")}>
+              <FaArrowLeft size={14} />
+            </button>
+          </div>
+
+          <div style={styles.contentWrapper}>
+            <h2 style={styles.titulo}>Minhas Disciplinas</h2>
+            <span style={styles.subtitulo}>Selecione uma para ver ações</span>
+
+            <div style={styles.disciplinasContainer}>
+              {disciplinas.map((disciplina, index) => {
+                const isSelected = disciplinaSelecionada?.idDisciplina === disciplina.idDisciplina;
+                const backgroundColor = isSelected
+                  ? coresDisciplinas[index % coresDisciplinas.length]
+                  : corDisciplinaNaoSelecionada;
+
+                return (
+                  <button
+                    key={disciplina.idDisciplina}
+                    onClick={() => handleDisciplinaClick(disciplina)}
+                    style={{
+                      ...styles.cardDisciplina,
+                      background: backgroundColor,
+                      color: isSelected ? "#FFF" : "#404040",
+                    }}
+                  >
+                    {disciplina.nome}
+                  </button>
+                );
+              })}
             </div>
 
-            <div style={styles.contentWrapper}>
-              <h2 style={styles.titulo}>{turma.nome}</h2>
-              <span style={styles.subtitulo}>Disciplinas</span>
-
-              <div style={styles.disciplinasContainer}>
-                {disciplinas.map((disciplina, index) => {
-                  const isSelected = disciplinaSelecionada?.idDisciplina === disciplina.idDisciplina;
-                  const backgroundColor = isSelected
-                    ? coresDisciplinas[index % coresDisciplinas.length]
-                    : corDisciplinaNaoSelecionada;
-
-                  return (
-                    <button
-                      key={disciplina.idDisciplina}
-                      onClick={() => handleDisciplinaClick(disciplina)}
-                      style={{
-                        ...styles.cardDisciplina,
-                        background: backgroundColor,
-                        color: isSelected ? "#FFF" : "#404040",
-                      }}
-                    >
-                      {disciplina.nome}
-                    </button>
-                  );
-                })}
-              </div>
-
-              <h3 style={styles.acoesTitulo}>Ações</h3>
-              <div style={styles.acoesContainer}>
-                {disciplinaSelecionada ? (
-                  <>
-                    <CardAcao texto="Alunos" icone={alunosIcon} onClick={() => handleAcaoClick('Alunos')} />
-                    <CardAcao texto="Registrar Presença" icone={registrarIcon} onClick={() => handleAcaoClick('Registrar Presença')} />
-                    <CardAcao texto="Lista de Presença" icone={listaIcon} onClick={() => handleAcaoClick('Lista de Presença')} />
-                    <CardAcao texto="Inserir Avaliação" icone={avaliacaoIcon} onClick={() => handleAcaoClick('Inserir Avaliação')} />
-                    <CardAcao texto="Lançar Notas" icone={notasIcon} onClick={() => handleAcaoClick('Lançar Notas')} />
-                  </>
-                ) : (
-                  <span style={{ color: "#aaa", marginTop: 40 }}>
-                    Selecione uma disciplina para exibir as ações.
-                  </span>
-                )}
-              </div>
+            <h3 style={styles.acoesTitulo}>Ações</h3>
+            <div style={styles.acoesContainer}>
+              {disciplinaSelecionada ? (
+                <>
+                  <CardAcao texto="Alunos" icone={alunosIcon} onClick={() => handleAcaoClick("Alunos")} />
+                  <CardAcao texto="Registrar Presença" icone={registrarIcon} onClick={() => handleAcaoClick("Registrar Presença")} />
+                  <CardAcao texto="Lista de Presença" icone={listaIcon} onClick={() => handleAcaoClick("Lista de Presença")} />
+                  <CardAcao texto="Inserir Avaliação" icone={avaliacaoIcon} onClick={() => handleAcaoClick("Inserir Avaliação")} />
+                  <CardAcao texto="Lançar Notas" icone={notasIcon} onClick={() => handleAcaoClick("Lançar Notas")} />
+                </>
+              ) : (
+                <span style={{ color: "#aaa", marginTop: 40 }}>
+                  Selecione uma disciplina para exibir as ações.
+                </span>
+              )}
             </div>
           </div>
         </div>
-      )}
+      </div>
     </Fundo>
   );
 }
@@ -277,4 +268,4 @@ const cardAcaoStyles = {
   },
 };
 
-export default TurmaDetalhe;
+export default Disciplinas;

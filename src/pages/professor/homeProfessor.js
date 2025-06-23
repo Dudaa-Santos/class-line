@@ -13,8 +13,9 @@ const coresTurmas = [
 
 function Home() {
   const [professor, setProfessor] = useState(null);
+  const idProfessor = localStorage.getItem("id_professor");
   const [turmas, setTurmas] = useState([]);
-  const navigate = useNavigate(); // HOOK DE NAVEGAÇÃO
+  const navigate = useNavigate();
 
   useEffect(() => {
     const idProfessor = localStorage.getItem("id_professor");
@@ -64,7 +65,7 @@ function Home() {
                   </div>
                   <button
                     style={styles.botaoVerMais}
-                    onClick={() => navigate(`/disciplinas/${turma.idTurma}`)} 
+                    onClick={() => navigate(`/disciplina/professor/${idProfessor}`)} 
                   >
                     Ver Mais
                   </button>

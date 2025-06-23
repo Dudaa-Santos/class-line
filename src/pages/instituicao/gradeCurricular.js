@@ -71,13 +71,19 @@ function GerenciarGradesCurriculares() {
         try {
           const disciplinasDaTurma = await instituicaoService.buscarDisciplinasSemestres(idTurma, token);
           const itensFormatados = (disciplinasDaTurma || []).map(item => ({
-            disciplina: { idDisciplina: item.id_disciplina ?? item.idDisciplina, nome: item.nome_disciplina ?? item.nomeDisciplina },
-            professor: { idProfessor: item.id_professor ?? item.idProfessor, nome: item.nome_professor ?? item.nomeProfessor },
-            semestre: item.nome_semestre ?? item.semestre ?? item.nome,
-            idDisciplina: item.id_disciplina ?? item.idDisciplina,
-            idProfessor: item.id_professor ?? item.idProfessor,
-            idSemestre: item.id_semestre ?? item.idSemestre,
-            carga_horaria: item.carga_horaria ?? item.cargaHoraria,
+            disciplina: {
+              idDisciplina: item.id?.idDisciplina,
+              nome: item.nomeDisciplina ?? '---',
+            },
+            professor: {
+              idProfessor: item.id?.idProfessor,
+              nome: item.nomeProfessor ?? '---',
+            },
+            semestre: item.semestre ?? '---',
+            idDisciplina: item.id?.idDisciplina,
+            idProfessor: item.id?.idProfessor,
+            idSemestre: item.id?.idSemestre,
+            carga_horaria: item.cargaHoraria ?? 0,
           }));
           setItens(itensFormatados);
         } catch {
@@ -142,6 +148,7 @@ function GerenciarGradesCurriculares() {
       );
 
       alert('Disciplina adicionada com sucesso!');
+
       setItens((prev) => [
         ...prev,
         {
@@ -181,8 +188,12 @@ function GerenciarGradesCurriculares() {
   };
 
   const handleEditar = (item) => {
-    console.log("Editar item:", item);
-    navigate(`/disciplinasemestre/trocar-professor/${idTurma}/${item.idDisciplina}/${item.idSemestre}`);
+    navigate(`/disciplinasemestre/trocar-professor/turma/${idTurma}/disciplina/${item.idDisciplina}/semestre/${item.idSemestre}`, {
+      state: {
+        nomeProfessor: item.professor?.nome,
+        idProfessor: item.professor?.idProfessor ??  item.idProfessor,
+      }
+    });
   };
 
   const handleCancelar = () => {

@@ -45,7 +45,7 @@ const Rotas = () => {
           <Route path="/cadastro-turma" element={<CadastroTurma />} />
           <Route path="/cadastro-curso" element={<CadastroCurso />} />
           <Route path="/cadastro-disciplina" element={<CadastroDiscplina />} />
-          <Route path="/disciplinasemestre/trocar-professor/:idTurma/:idDisciplina/:idSemestre" element={<EdicaoDisciplina />} />
+          <Route path="/disciplinasemestre/trocar-professor/turma/:idTurma/disciplina/:idDisciplina/semestre/:idSemestre" element={<EdicaoDisciplina />} />
           <Route path="/grade-curricular/:idTurma" element={<GradeCurricular />} />
           <Route path="/alunos" element={<Alunos />} />
           <Route path="/professores" element={<Professores />} />
@@ -55,8 +55,8 @@ const Rotas = () => {
 
         <Route element={<PrivateRoute tipoPermitido="professor" />}>
           <Route path="/home-professor" element={<HomeProfessor />} />
-          <Route path="/disciplinas/:id" element={<Disciplinas />} />
-          <Route path="/aluno/disciplina/:idDisciplina" element={<AlunosDisciplina />} />
+          <Route path="/disciplina/professor/:idProfessor" element={<Disciplinas />} />
+          <Route path="/alunos/disciplina/:idDisciplina" element={<AlunosDisciplina />} />
           <Route path="/frequencia/turma/:idTurma/disciplina/:idDisciplina" element={<RegistrarPresenca />} />
           <Route path="/professor/turmas/:idTurma/disciplinas/:idDisciplina/lista-presenca" element={<ListaPresenca />} />
           <Route path="/professor/turmas/:idTurma/disciplinas/:idDisciplina/inserir-avaliacao" element={<InserirAvaliacao />} />

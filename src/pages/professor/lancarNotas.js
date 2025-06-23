@@ -31,25 +31,37 @@ function LancarNotas() {
   }, [idTurma, idDisciplina, idProfessor, token]);
 
   useEffect(() => {
-    async function carregarAlunos() {
-      if (!avaliacaoSelecionada) return;
+    async function carregarNotasDosAlunos() {
+      if (!avaliacaoSelecionada || !token) return;
 
       try {
-        const alunosAPI = await professorService.buscarAluno(idTurma, token);
-        const lista = alunosAPI.map(aluno => ({
-          idAluno: aluno.idAluno ?? aluno.id,
-          nome: aluno.nome,
-          nota: ''
-        }));
-        setAlunosNotas(lista);
+        const alunosComNotas = await professorService.buscarNotas(avaliacaoSelecionada, token);
+
+        if (alunosComNotas.length > 0) {
+          const lista = alunosComNotas.map(aluno => ({
+            idAluno: aluno.idAluno,
+            nome: aluno.nomeAluno,
+            nota: aluno.valor === 0 ? '' : aluno.valor
+          }));
+          setAlunosNotas(lista);
+        } else {
+          const alunos = await professorService.buscarAluno(idTurma, token);
+          const lista = alunos.map(aluno => ({
+            idAluno: aluno.idAluno ?? aluno.id,
+            nome: aluno.nome,
+            nota: ''
+          }));
+          setAlunosNotas(lista);
+        }
+
       } catch (error) {
-        console.error("Erro ao buscar alunos:", error);
-        alert("Erro ao buscar alunos.");
+        console.error("Erro ao carregar notas ou alunos:", error);
+        alert("Erro ao carregar notas ou alunos.");
       }
     }
 
-    carregarAlunos();
-  }, [avaliacaoSelecionada]);
+    carregarNotasDosAlunos();
+  }, [avaliacaoSelecionada, token, idTurma]);
 
   const handleNotaChange = (idx, novaNota) => {
     const atualizados = [...alunosNotas];
@@ -59,17 +71,14 @@ function LancarNotas() {
 
   const handleFinalizar = async () => {
     try {
-      const payload = {
-        idAvaliacao: avaliacaoSelecionada,
-        notas: alunosNotas.map(a => ({
-          idAluno: a.idAluno,
-          nota: parseFloat(a.nota)
-        }))
-      };
+      const payload = alunosNotas.map(a => ({
+        idAluno: a.idAluno,
+        valor: parseFloat(a.nota)
+      }));
 
-      await professorService.lancarNotas(payload, token);
+      await professorService.lancarNotas(avaliacaoSelecionada, payload, token);
       alert('Notas lançadas com sucesso!');
-      navigate(`/grade-curricular/${idTurma}`);
+      navigate(`/disciplinas/${idTurma}`);
     } catch (error) {
       console.error("Erro ao lançar notas:", error);
       alert("Erro ao lançar notas.");
@@ -77,7 +86,7 @@ function LancarNotas() {
   };
 
   const handleCancelar = () => {
-    navigate(`/grade-curricular/${idTurma}`);
+    window.history.back();
   };
 
   return (
@@ -93,7 +102,7 @@ function LancarNotas() {
           >
             <option value="">Selecione uma Avaliação</option>
             {avaliacoes.map((av) => (
-              <option key={av.id} value={av.id}>{av.nome}</option>
+              <option key={av.idAvaliacao} value={av.idAvaliacao}>{av.nome}</option>
             ))}
           </select>
         </div>
