@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import professorService from "../../services/professorService";
 import Fundo from "../../components/fundo-nav";
 
@@ -12,6 +12,7 @@ import { FaArrowLeft } from "react-icons/fa";
 
 function Disciplinas() {
   const navigate = useNavigate();
+  const { idTurma } = useParams();
   const [disciplinas, setDisciplinas] = useState([]);
   const [disciplinaSelecionada, setDisciplinaSelecionada] = useState(null);
   const token = localStorage.getItem("token");
@@ -35,13 +36,8 @@ function Disciplinas() {
   const handleAcaoClick = (acao) => {
     if (!disciplinaSelecionada) return;
 
-    const idTurma = disciplinaSelecionada.idTurma;
     const idDisciplina = disciplinaSelecionada.idDisciplina;
 
-  console.log("Ação:", acao);
-  console.log("Disciplina selecionada:", disciplinaSelecionada);
-  console.log("idTurma:", idTurma);
-  console.log("idDisciplina:", idDisciplina);
     let path = '';
 
     switch (acao) {

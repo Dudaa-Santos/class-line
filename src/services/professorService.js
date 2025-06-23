@@ -15,7 +15,6 @@ const loginProfessor = async (cpf, senha) => {
 };
 
 const buscarProfessor = async (idProfessor, token) => {
-  console.log(idProfessor)
   const response = await httpClient.get(
     `/professor/${idProfessor}`,
     { 
@@ -29,7 +28,6 @@ const buscarProfessor = async (idProfessor, token) => {
 };
 
 const buscarTurmaProfessor = async ( idProfessor, token) => {
-  console.log( idProfessor)
   const response = await httpClient.get(
     `/turma/professor/${idProfessor}`,
     { 

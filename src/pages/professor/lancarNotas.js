@@ -12,6 +12,7 @@ function LancarNotas() {
   const [avaliacoes, setAvaliacoes] = useState([]);
   const [avaliacaoSelecionada, setAvaliacaoSelecionada] = useState('');
   const [alunosNotas, setAlunosNotas] = useState([]);
+  const [loadingAlunos, setLoadingAlunos] = useState(false);
 
   useEffect(() => {
     async function carregarAvaliacoes() {
@@ -34,6 +35,7 @@ function LancarNotas() {
     async function carregarNotasDosAlunos() {
       if (!avaliacaoSelecionada || !token) return;
 
+      setLoadingAlunos(true);
       try {
         const alunosComNotas = await professorService.buscarNotas(avaliacaoSelecionada, token);
 
@@ -53,10 +55,11 @@ function LancarNotas() {
           }));
           setAlunosNotas(lista);
         }
-
       } catch (error) {
         console.error("Erro ao carregar notas ou alunos:", error);
         alert("Erro ao carregar notas ou alunos.");
+      } finally {
+        setLoadingAlunos(false);
       }
     }
 
@@ -108,36 +111,40 @@ function LancarNotas() {
         </div>
 
         {avaliacaoSelecionada && (
-          <div style={styles.tabelaContainer}>
-            <table style={styles.table}>
-              <thead>
-                <tr>
-                  <th style={styles.th}>Nome do Aluno</th>
-                  <th style={styles.thNota}>Nota</th>
-                </tr>
-              </thead>
-              <tbody>
-                {alunosNotas.map((item, idx) => (
-                  <tr key={item.idAluno}>
-                    <td style={styles.td}>{item.nome}</td>
-                    <td style={{ ...styles.td, textAlign: 'center' }}>
-                    <div style={{ display: 'flex', justifyContent: 'center' }}>
-                      <input
-                        type="number"
-                        min="0"
-                        max="10"
-                        step="0.1"
-                        value={item.nota}
-                        onChange={(e) => handleNotaChange(idx, e.target.value)}
-                        style={styles.inputNota}
-                      />
-                    </div>
-                  </td>
+          loadingAlunos ? (
+            <p style={{ marginTop: '20px', fontSize: '16px', color: '#444' }}>Carregando alunos...</p>
+          ) : (
+            <div style={styles.tabelaContainer}>
+              <table style={styles.table}>
+                <thead>
+                  <tr>
+                    <th style={styles.th}>Nome do Aluno</th>
+                    <th style={styles.thNota}>Nota</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {alunosNotas.map((item, idx) => (
+                    <tr key={item.idAluno}>
+                      <td style={styles.td}>{item.nome}</td>
+                      <td style={{ ...styles.td, textAlign: 'center' }}>
+                        <div style={{ display: 'flex', justifyContent: 'center' }}>
+                          <input
+                            type="number"
+                            min="0"
+                            max="10"
+                            step="0.1"
+                            value={item.nota}
+                            onChange={(e) => handleNotaChange(idx, e.target.value)}
+                            style={styles.inputNota}
+                          />
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )
         )}
 
         <div style={styles.botoesContainer}>

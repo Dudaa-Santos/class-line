@@ -217,7 +217,6 @@ semDados: {
   padding: '20px',
   textAlign: 'center',
   color: '#999',
-  fontStyle: 'italic',
 },
 
 };

@@ -142,6 +142,12 @@ useEffect(() => {
                   Carregando alunos...
                 </td>
               </tr>
+            ) : alunos.length === 0 ? (
+              <tr>
+                <td colSpan="2" style={styles.semDados}>
+                  Nenhum aluno encontrado.
+                </td>
+              </tr>
             ) : (
               alunos.map((aluno) => (
                 <tr key={aluno.idAluno}>
@@ -267,5 +273,10 @@ const styles = {
     borderRadius: '6px',
     cursor: 'pointer',
     fontSize: '16px',
+  },
+  semDados: {
+    padding: '20px',
+    textAlign: 'center',
+    color: '#999',
   },
 };

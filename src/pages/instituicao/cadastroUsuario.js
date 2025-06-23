@@ -279,6 +279,7 @@ export default function CadastroUsuario() {
               value={form.dt_nascimento}
               onChange={handleChange}
               style={styles.input}
+              title="Data de Nascimento"
             />
             <select
               name="genero"
@@ -360,15 +361,16 @@ export default function CadastroUsuario() {
 
             {tipoUsuario === 'ALUNO' && (
               <>
-                <input
-                  name="dt_inicio"
-                  type="date"
-                  placeholder="Data da Matrícula"
-                  value={form.dt_inicio}
-                  onChange={handleChange}
-                  style={styles.input}
-                  required
-                />
+              <input
+                name="dt_inicio"
+                type="date"
+                placeholder="Data da Matrícula"
+                value={form.dt_inicio}
+                onChange={handleChange}
+                style={styles.input}
+                required
+                title="Data da Matrícula"
+              />
 
                 <select
                   name="id_curso"
@@ -450,15 +452,16 @@ export default function CadastroUsuario() {
                     onChange={handleChange}
                     required
                   />
-                  <input
-                    name="dt_admissao"
-                    type="date"
-                    placeholder="Data de Admissão"
-                    value={form.dt_admissao}
-                    onChange={handleChange}
-                    style={styles.input}
-                    required
-                  />
+                <input
+                  name="dt_admissao"
+                  type="date"
+                  placeholder="Data de Admissão"
+                  value={form.dt_admissao}
+                  onChange={handleChange}
+                  style={styles.input}
+                  required
+                  title="Data da Admissão"
+                />
                 </div>
 
                 <div style={styles.fullWidth}>

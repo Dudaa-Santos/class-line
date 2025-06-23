@@ -48,7 +48,7 @@ function Home() {
               const cor = coresTurmas[idx % coresTurmas.length];
               return (
                 <div
-                  key={turma.id || idx}
+                  key={turma.idTurma || idx}
                   style={{
                     ...styles.turmaCard,
                     background: `linear-gradient(0deg, #fff 65%, ${cor} 35%)`,
@@ -64,11 +64,16 @@ function Home() {
                     {turma.nome}
                   </div>
                   <button
-                    style={styles.botaoVerMais}
-                    onClick={() => navigate(`/disciplina/professor/${idProfessor}`)} 
-                  >
-                    Ver Mais
-                  </button>
+                  style={styles.botaoVerMais}
+                  onClick={() => {
+                    console.log("turma:", turma);
+                    console.log("idProfessor:", idProfessor);
+                    navigate(`/disciplina/turma/${turma.idTurma}/professor/${idProfessor}`);
+                  }}
+                >
+                  Ver Mais
+                </button>
+
                 </div>
               );
             })

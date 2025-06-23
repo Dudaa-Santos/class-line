@@ -97,13 +97,10 @@ export default function CadastroTurma() {
 
             <input
               name="dt_inicio"
-              type="text"
-              placeholder="Data início"
+              type="date"
+              placeholder="Data de início"
+              title="Data de início da turma"
               value={form.dt_inicio}
-              onFocus={e => (e.target.type = 'date')}
-              onBlur={e => {
-                if (!e.target.value) e.target.type = 'text';
-              }}
               onChange={handleChange}
               style={styles.input}
               required
@@ -111,13 +108,10 @@ export default function CadastroTurma() {
 
             <input
               name="dt_fim"
-              type="text"
-              placeholder="Data fim"
+              type="date"
+              placeholder="Data de término"
+              title="Data de encerramento da turma"
               value={form.dt_fim}
-              onFocus={e => (e.target.type = 'date')}
-              onBlur={e => {
-                if (!e.target.value) e.target.type = 'text';
-              }}
               onChange={handleChange}
               style={styles.input}
               required
