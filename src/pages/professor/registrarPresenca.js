@@ -14,61 +14,60 @@ function RegistrarPresenca() {
   const [loading, setLoading] = useState(false);  
   const navigate = useNavigate();
 
-useEffect(() => {
-  if (!dataAula) return;
+  useEffect(() => {
+    if (!dataAula) return;
 
-  async function carregarAlunos() {
-    const token = localStorage.getItem('token');
-    setLoading(true); // começa a carregar
+    async function carregarAlunos() {
+      const token = localStorage.getItem('token');
+      setLoading(true); // começa a carregar
 
-    try {
-      const listaPresenca = await professorService.listaPresenca(idDisciplina, idProfessor, dataAula, token);
-      const alunosComPresenca = listaPresenca.map((p) => ({
-        idAluno: p.idAluno,
-        nome: p.nomeAluno,
-      }));
-
-      setAlunos(alunosComPresenca);
-
-      const mapPresencas = {};
-      listaPresenca.forEach((p) => {
-        mapPresencas[p.idAluno] = p.presente;
-      });
-      setPresencas(mapPresencas);
-      setIsUpdating(true);
-    } catch (err) {
-      console.warn('Não foi possível carregar a lista de presença. Buscando alunos normalmente...');
-      setAlunos([]);
-      setPresencas({});
       try {
-        const dados = await professorService.buscarAluno(idTurma, token);
-        const alunosSemPresenca = dados.map((aluno) => ({
-          idAluno: aluno.idAluno,
-          nome: aluno.nome,
+        const listaPresenca = await professorService.listaPresenca(idDisciplina, idProfessor, dataAula, token);
+        const alunosComPresenca = listaPresenca.map((p) => ({
+          idAluno: p.idAluno,
+          nome: p.nomeAluno,
         }));
 
-        setAlunos(alunosSemPresenca);
+        setAlunos(alunosComPresenca);
 
         const mapPresencas = {};
-        dados.forEach((aluno) => {
-          mapPresencas[aluno.id] = false;
+        listaPresenca.forEach((p) => {
+          mapPresencas[p.idAluno] = p.presente;
         });
         setPresencas(mapPresencas);
-        setIsUpdating(false);
-      } catch (err2) {
-        alert('Erro ao carregar alunos.');
-        console.error(err2);
-      }
-    } finally {
-      setLoading(false); 
-    }
-  }
+        setIsUpdating(true);
+      } catch (err) {
+        console.warn('Não foi possível carregar a lista de presença. Buscando alunos normalmente...');
+        setAlunos([]);
+        setPresencas({});
+        try {
+          const dados = await professorService.buscarAluno(idTurma, token);
+          const alunosSemPresenca = dados.map((aluno) => ({
+            idAluno: aluno.idAluno,
+            nome: aluno.nome,
+          }));
 
-  carregarAlunos();
-}, [dataAula, idDisciplina, idProfessor, idTurma]);
+          setAlunos(alunosSemPresenca);
+
+          const mapPresencas = {};
+          dados.forEach((aluno) => {
+            mapPresencas[aluno.id] = false;
+          });
+          setPresencas(mapPresencas);
+          setIsUpdating(false);
+        } catch (err2) {
+          alert('Erro ao carregar alunos.');
+          console.error(err2);
+        }
+      } finally {
+        setLoading(false); // Desativa o loading após o carregamento
+      }
+    }
+
+    carregarAlunos();
+  }, [dataAula, idDisciplina, idProfessor, idTurma]);
 
   const handleCheckboxChange = (idAluno) => {
-    console.log(`Checkbox changed for aluno ID: ${idAluno}`);
     setPresencas((prev) => ({
       ...prev,
       [idAluno]: !prev[idAluno],
@@ -76,6 +75,8 @@ useEffect(() => {
   };
 
   const handleSubmit = async () => {
+    setLoading(true); // Ativa o loading quando o envio começa
+
     const token = localStorage.getItem('token');
 
     const payload = {
@@ -94,88 +95,94 @@ useEffect(() => {
         await professorService.atualizarPresenca(idDisciplina, idProfessor, payload, token);
         alert('Presença atualizada com sucesso!');
       } else {
-          await professorService.lancarPresenca(idDisciplina, idProfessor, payload, token);
-          alert('Presença registrada com sucesso!');
+        await professorService.lancarPresenca(idDisciplina, idProfessor, payload, token);
+        alert('Presença registrada com sucesso!');
       }
-      navigate(`/disciplinas/${idTurma}`);
     } catch (error) {
       alert('Erro ao registrar presença.');
       console.error(error);
+    } finally {
+      setLoading(false);  // Desativa o loading após o envio
     }
   };
 
   return (
-  <Fundo>
-    <div style={styles.wrapper}>
-      <h2 style={styles.titulo}>Registrar Presença</h2>
+    <Fundo>
+      <div style={styles.wrapper}>
+        <h2 style={styles.titulo}>Registrar Presença</h2>
 
-      <div style={styles.cabecalho}>
-        <input
-          type="date"
-          value={dataAula}
-          onChange={(e) => setDataAula(e.target.value)}
-          style={styles.input}
-          title="Data da Aula"
-        />
-        <input
-          type="text"
-          value={conteudo}
-          onChange={(e) => setConteudo(e.target.value)}
-          style={{ ...styles.input, flex: 1 }}
-          placeholder="Descrição do Conteúdo"
-        />
-      </div>
+        <div style={styles.cabecalho}>
+          <input
+            type="date"
+            value={dataAula}
+            onChange={(e) => setDataAula(e.target.value)}
+            style={styles.input}
+            title="Data da Aula"
+          />
+          <input
+            type="text"
+            value={conteudo}
+            onChange={(e) => setConteudo(e.target.value)}
+            style={{ ...styles.input, flex: 1 }}
+            placeholder="Descrição do Conteúdo"
+          />
+        </div>
 
-      <div style={styles.tabelaWrapper}>
-        <div style={styles.tabelaContainer}>
-          <table style={styles.table}>
-            <thead>
-              <tr>
-                <th style={styles.th}>Nome</th>
-                <th style={styles.thCenter}>Presente</th>
-              </tr>
-            </thead>
-            <tbody>
-            {loading ? (
-              <tr>
-                <td colSpan="2" style={{ textAlign: 'center', padding: '20px' }}>
-                  Carregando alunos...
-                </td>
-              </tr>
-            ) : alunos.length === 0 ? (
-              <tr>
-                <td colSpan="2" style={styles.semDados}>
-                  Nenhum aluno encontrado.
-                </td>
-              </tr>
-            ) : (
-              alunos.map((aluno) => (
-                <tr key={aluno.idAluno}>
-                  <td style={styles.td}>{aluno.nome}</td>
-                  <td style={styles.tdCheckbox}>
-                    <input
-                      type="checkbox"
-                      checked={!!presencas[aluno.idAluno]}
-                      onChange={() => handleCheckboxChange(aluno.idAluno)}
-                    />
-                  </td>
+        <div style={styles.tabelaWrapper}>
+          <div style={styles.tabelaContainer}>
+            <table style={styles.table}>
+              <thead>
+                <tr>
+                  <th style={styles.th}>Nome</th>
+                  <th style={styles.thCenter}>Presente</th>
                 </tr>
-              ))
-            )}
-          </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {loading ? (
+                  <tr>
+                    <td colSpan="2" style={{ textAlign: 'center', padding: '20px' }}>
+                      Carregando alunos...
+                    </td>
+                  </tr>
+                ) : alunos.length === 0 ? (
+                  <tr>
+                    <td colSpan="2" style={styles.semDados}>
+                      Nenhum aluno encontrado.
+                    </td>
+                  </tr>
+                ) : (
+                  alunos.map((aluno) => (
+                    <tr key={aluno.idAluno}>
+                      <td style={styles.td}>{aluno.nome}</td>
+                      <td style={styles.tdCheckbox}>
+                        <input
+                          type="checkbox"
+                          checked={!!presencas[aluno.idAluno]}
+                          onChange={() => handleCheckboxChange(aluno.idAluno)}
+                        />
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div style={styles.botoes}>
+          <button style={styles.botaoCancelar} onClick={() => navigate(-1)}>Cancelar</button>
+          <button 
+            style={styles.botaoFinalizar} 
+            onClick={handleSubmit}
+            disabled={loading}  // Desabilita o botão enquanto o loading estiver ativo
+          >
+            {loading ? 'Registrando...' : 'Finalizar'}
+          </button>
         </div>
       </div>
-
-      <div style={styles.botoes}>
-        <button style={styles.botaoCancelar} onClick={() => navigate(-1)}>Cancelar</button>
-        <button style={styles.botaoFinalizar} onClick={handleSubmit}>Finalizar</button>
-      </div>
-    </div>
-  </Fundo>
-);
+    </Fundo>
+  );
 }
-export default RegistrarPresenca;
 
 const styles = {
   wrapper: {
@@ -280,3 +287,5 @@ const styles = {
     color: '#999',
   },
 };
+
+export default RegistrarPresenca;
