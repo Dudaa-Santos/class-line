@@ -56,11 +56,11 @@ const Rotas = () => {
         <Route element={<PrivateRoute tipoPermitido="professor" />}>
           <Route path="/home-professor" element={<HomeProfessor />} />
           <Route path="/disciplina/professor/:idProfessor" element={<Disciplinas />} />
-          <Route path="/alunos/disciplina/:idDisciplina" element={<AlunosDisciplina />} />
+          <Route path="/alunos/turma/:idTurma/disciplina/:idDisciplina" element={<AlunosDisciplina />} />
           <Route path="/frequencia/turma/:idTurma/disciplina/:idDisciplina" element={<RegistrarPresenca />} />
-          <Route path="/professor/turmas/:idTurma/disciplinas/:idDisciplina/lista-presenca" element={<ListaPresenca />} />
-          <Route path="/professor/turmas/:idTurma/disciplinas/:idDisciplina/inserir-avaliacao" element={<InserirAvaliacao />} />
-          <Route path="/professor/turmas/:idTurma/disciplinas/:idDisciplina/lancar-notas" element={<LancarNotas />} />
+          <Route path="/professor/turma/:idTurma/disciplina/:idDisciplina/lista-presenca" element={<ListaPresenca />} />
+          <Route path="/professor/turma/:idTurma/disciplina/:idDisciplina/inserir-avaliacao" element={<InserirAvaliacao />} />
+          <Route path="/professor/turma/:idTurma/disciplina/:idDisciplina/lancar-notas" element={<LancarNotas />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/login-professor" />} />

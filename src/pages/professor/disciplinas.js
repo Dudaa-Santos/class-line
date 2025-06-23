@@ -37,23 +37,28 @@ function Disciplinas() {
 
     const idTurma = disciplinaSelecionada.idTurma;
     const idDisciplina = disciplinaSelecionada.idDisciplina;
+
+  console.log("Ação:", acao);
+  console.log("Disciplina selecionada:", disciplinaSelecionada);
+  console.log("idTurma:", idTurma);
+  console.log("idDisciplina:", idDisciplina);
     let path = '';
 
     switch (acao) {
       case 'Alunos':
-        path = `/alunos/disciplina/${idDisciplina}`;
+        path = `/alunos/turma/${idTurma}/disciplina/${idDisciplina}`;
         break;
       case 'Registrar Presença':
         path = `/frequencia/turma/${idTurma}/disciplina/${idDisciplina}`;
         break;
       case 'Lista de Presença':
-        path = `/professor/turmas/${idTurma}/disciplinas/${idDisciplina}/lista-presenca`;
+        path = `/professor/turma/${idTurma}/disciplina/${idDisciplina}/lista-presenca`;
         break;
       case 'Inserir Avaliação':
-        path = `/professor/turmas/${idTurma}/disciplinas/${idDisciplina}/inserir-avaliacao`;
+        path = `/professor/turma/${idTurma}/disciplina/${idDisciplina}/inserir-avaliacao`;
         break;
       case 'Lançar Notas':
-        path = `/professor/turmas/${idTurma}/disciplinas/${idDisciplina}/lancar-notas`;
+        path = `/professor/turma/${idTurma}/disciplina/${idDisciplina}/lancar-notas`;
         break;
       default:
         return;

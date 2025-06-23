@@ -60,7 +60,7 @@ useEffect(() => {
         console.error(err2);
       }
     } finally {
-      setLoading(false); // termina o carregamento
+      setLoading(false); 
     }
   }
 
@@ -115,7 +115,7 @@ useEffect(() => {
           value={dataAula}
           onChange={(e) => setDataAula(e.target.value)}
           style={styles.input}
-          placeholder="Data da Aula"
+          title="Data da Aula"
         />
         <input
           type="text"

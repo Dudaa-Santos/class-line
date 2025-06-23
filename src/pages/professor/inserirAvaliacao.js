@@ -12,7 +12,7 @@ function InserirAvaliacao() {
     data: '',
   });
 
-  const { idTurma, idDisciplina } = useParams();
+  const { idTurma, idDisciplina } = useParams(); 
   const idProfessor = localStorage.getItem('id_professor');
   const token = localStorage.getItem('token');
 
@@ -102,7 +102,15 @@ function InserirAvaliacao() {
           </select>
           <input name="nome" placeholder="Nome" value={form.nome} onChange={handleChange} style={styles.input} required />
           <input name="peso" placeholder="Peso" type="number" value={form.peso} onChange={handleChange} style={styles.input} required />
-          <input name="data" type="date" value={form.data} onChange={handleChange} style={styles.input} required />
+          <input
+            name="data"
+            type="date"
+            value={form.data}
+            onChange={handleChange}
+            style={styles.input}
+            required
+            title="Data da Aplicação"
+          />
           <button type="submit" style={styles.botaoAdicionar}>+</button>
         </form>
 
